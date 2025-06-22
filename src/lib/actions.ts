@@ -1,5 +1,5 @@
 
-import { collection, addDoc, getDocs, query, where, doc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, doc, getDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Project } from '@/types';
 
@@ -65,4 +65,20 @@ export async function getProject(projectId: string, userId: string): Promise<Pro
         }
     }
     return null;
+}
+
+export async function deleteProject(projectId: string, userId: string): Promise<void> {
+  const projectRef = doc(db, 'projects', projectId);
+  const projectSnap = await getDoc(projectRef);
+
+  if (!projectSnap.exists() || projectSnap.data().userId !== userId) {
+    throw new Error("Project not found or you don't have permission to delete it.");
+  }
+
+  try {
+    await deleteDoc(projectRef);
+  } catch (e) {
+    console.error('Error deleting document: ', e);
+    throw new Error('Could not delete project.');
+  }
 }

@@ -1,12 +1,13 @@
 "use client";
 
 import { generateProjectSetup } from "@/ai/flows/generate-project-setup";
+import { generateProjectName } from "@/ai/flows/generate-project-name";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, FileCode, FolderTree, Rocket, Save, Loader2, LogIn } from "lucide-react";
+import { Copy, FileCode, FolderTree, Rocket, Save, Loader2, LogIn, WandSparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
@@ -24,6 +25,7 @@ export function ProjectSetupDisplay({ finalSummary }: ProjectSetupDisplayProps) 
     const [fileStructure, setFileStructure] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [isGeneratingName, setIsGeneratingName] = useState(false);
     const { toast } = useToast();
     const { user } = useAuth();
     const router = useRouter();
@@ -50,6 +52,19 @@ export function ProjectSetupDisplay({ finalSummary }: ProjectSetupDisplayProps) 
         getSetup();
     }, [finalSummary, toast]);
     
+    const handleGenerateName = async () => {
+        setIsGeneratingName(true);
+        try {
+            const result = await generateProjectName({ summary: finalSummary });
+            setProjectName(result.projectName);
+            toast({ title: 'Name Generated!', description: 'A new creative name has been generated.' });
+        } catch (error) {
+            toast({ variant: 'destructive', title: 'AI Error', description: 'Could not generate a project name.' });
+        } finally {
+            setIsGeneratingName(false);
+        }
+    };
+
     const handleSave = async () => {
         if (!user) {
             router.push('/login');
@@ -113,6 +128,7 @@ export function ProjectSetupDisplay({ finalSummary }: ProjectSetupDisplayProps) 
             <CardContent className="space-y-8">
                 {isLoading ? (
                     <div className="space-y-6">
+                         <Skeleton className="h-10 w-full" />
                         <div className="space-y-2">
                            <Skeleton className="h-8 w-1/3 mb-2" />
                            <Skeleton className="h-40 w-full" />
@@ -126,12 +142,19 @@ export function ProjectSetupDisplay({ finalSummary }: ProjectSetupDisplayProps) 
                     <>
                         <div className="space-y-2">
                             <Label htmlFor="project-name" className="text-lg">Project Name</Label>
-                             <Input
-                                id="project-name"
-                                placeholder="e.g., 'My Awesome Coffee Finder App'"
-                                value={projectName}
-                                onChange={(e) => setProjectName(e.target.value)}
-                            />
+                             <div className="flex gap-2 items-center">
+                                <Input
+                                    id="project-name"
+                                    placeholder="e.g., 'My Awesome Coffee Finder App'"
+                                    value={projectName}
+                                    onChange={(e) => setProjectName(e.target.value)}
+                                    className="flex-grow"
+                                />
+                                <Button type="button" onClick={handleGenerateName} disabled={isGeneratingName || isLoading}>
+                                    {isGeneratingName ? <Loader2 className="mr-2 animate-spin" /> : <WandSparkles className="mr-2" />}
+                                    Generate
+                                </Button>
+                            </div>
                         </div>
                         <div>
                             <div className="flex items-center justify-between mb-2">

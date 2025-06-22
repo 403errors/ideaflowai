@@ -5,20 +5,26 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/auth-context';
-import { getProjects } from '@/lib/actions';
+import { deleteProject, getProjects } from '@/lib/actions';
 import type { Project } from '@/types';
 import { AppHeader } from '@/components/app-header';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PlusCircle, ArrowRight } from 'lucide-react';
+import { PlusCircle, ArrowRight, Trash, Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -37,6 +43,28 @@ export default function DashboardPage() {
       fetchProjects();
     }
   }, [user]);
+
+  const handleDeleteClick = (project: Project) => {
+    setProjectToDelete(project);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!projectToDelete || !user) return;
+    setIsDeleting(true);
+    try {
+      await deleteProject(projectToDelete.id, user.uid);
+      setProjects(projects.filter((p) => p.id !== projectToDelete.id));
+      toast({ title: 'Project deleted', description: `"${projectToDelete.name}" has been deleted.` });
+    } catch (error) {
+      console.error(error);
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete project.' });
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+      setProjectToDelete(null);
+    }
+  };
 
   if (authLoading || loading) {
     return (
@@ -58,7 +86,7 @@ export default function DashboardPage() {
                             <Skeleton className="h-10 w-full" />
                         </CardContent>
                         <CardFooter>
-                           <Skeleton className="h-10 w-28" />
+                           <Skeleton className="h-10 w-full" />
                         </CardFooter>
                     </Card>
                 ))}
@@ -98,11 +126,17 @@ export default function DashboardPage() {
                    </p>
                 </CardContent>
                 <CardFooter>
-                  <Button asChild className="w-full">
-                    <Link href={`/project/${project.id}`}>
-                      Open Project <ArrowRight className="ml-2" />
-                    </Link>
-                  </Button>
+                  <div className='flex justify-between items-center w-full gap-2'>
+                    <Button asChild className="w-full">
+                      <Link href={`/project/${project.id}`}>
+                        Open Project <ArrowRight className="ml-2" />
+                      </Link>
+                    </Button>
+                    <Button variant="destructive" size="icon" onClick={() => handleDeleteClick(project)}>
+                      <Trash className="h-4 w-4" />
+                      <span className="sr-only">Delete project</span>
+                    </Button>
+                  </div>
                 </CardFooter>
               </Card>
             ))}
@@ -120,6 +154,25 @@ export default function DashboardPage() {
           </div>
         )}
       </main>
+
+       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the project
+              "{projectToDelete?.name}" and all of its associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} disabled={isDeleting}>
+              {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 'use server';
 
-import { collection, addDoc, getDocs, query, where, doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, doc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Project } from '@/types';
 
@@ -10,25 +10,6 @@ interface ProjectData {
   finalSummary: string;
   setupPrompt: string;
   fileStructure: string;
-}
-
-export async function createUserProfile(user: { uid: string; email: string | null; displayName: string | null; photoURL: string | null; }): Promise<void> {
-  const userRef = doc(db, 'users', user.uid);
-  const docSnap = await getDoc(userRef);
-
-  if (!docSnap.exists()) {
-    try {
-      await setDoc(userRef, {
-        uid: user.uid,
-        email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
-        createdAt: serverTimestamp(),
-      });
-    } catch (e) {
-      console.error('Error creating user profile: ', e);
-    }
-  }
 }
 
 export async function saveProject(projectData: ProjectData): Promise<string> {

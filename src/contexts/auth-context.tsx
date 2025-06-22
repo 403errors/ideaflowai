@@ -2,9 +2,9 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback, useMemo } from 'react';
 import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signInAnonymously as firebaseSignInAnonymously, signOut as firebaseSignOut, type User } from 'firebase/auth';
-import { app } from '@/lib/firebase';
+import { app, db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
-import { createUserProfile } from '@/lib/actions';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import type { AppUser } from '@/types';
 
 interface AuthContextType {
@@ -28,16 +28,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        const userProfileData = {
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            displayName: firebaseUser.displayName,
-            photoURL: firebaseUser.photoURL,
-        };
-        await createUserProfile(userProfileData);
+        // User profile creation logic now runs on the client
+        const userRef = doc(db, 'users', firebaseUser.uid);
+        const docSnap = await getDoc(userRef);
 
+        if (!docSnap.exists()) {
+          try {
+            await setDoc(userRef, {
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              displayName: firebaseUser.displayName,
+              photoURL: firebaseUser.photoURL,
+              createdAt: serverTimestamp(),
+            });
+          } catch (e) {
+            console.error('Error creating user profile: ', e);
+          }
+        }
+        
         const appUser: AppUser = {
-          ...userProfileData,
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          displayName: firebaseUser.displayName,
+          photoURL: firebaseUser.photoURL,
           isAnonymous: firebaseUser.isAnonymous,
         };
         setUser(appUser);

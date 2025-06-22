@@ -6,19 +6,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, FileCode, FolderTree, Rocket, ChevronRight } from "lucide-react";
+import { Copy, FileCode, FolderTree, Rocket, Save, Loader2, LogIn } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/auth-context";
+import { useRouter } from "next/navigation";
+import { saveProject } from "@/lib/actions";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
 
 interface ProjectSetupDisplayProps {
   finalSummary: string;
-  onComplete: (setupPromptContent: string) => void;
 }
 
-export function ProjectSetupDisplay({ finalSummary, onComplete }: ProjectSetupDisplayProps) {
+export function ProjectSetupDisplay({ finalSummary }: ProjectSetupDisplayProps) {
+    const [projectName, setProjectName] = useState('');
     const [setupPromptContent, setSetupPromptContent] = useState('');
     const [fileStructure, setFileStructure] = useState('');
     const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
     const { toast } = useToast();
+    const { user } = useAuth();
+    const router = useRouter();
 
     useEffect(() => {
         const getSetup = async () => {
@@ -39,9 +47,49 @@ export function ProjectSetupDisplay({ finalSummary, onComplete }: ProjectSetupDi
                 setIsLoading(false);
             }
         };
-
         getSetup();
     }, [finalSummary, toast]);
+    
+    const handleSave = async () => {
+        if (!user) {
+            router.push('/login');
+            return;
+        }
+        if (!projectName.trim()) {
+            toast({
+                variant: 'destructive',
+                title: 'Project Name Required',
+                description: 'Please enter a name for your project.'
+            });
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            const newProjectId = await saveProject({
+                userId: user.uid,
+                name: projectName,
+                finalSummary,
+                setupPrompt: setupPromptContent,
+                fileStructure,
+            });
+            toast({
+                title: 'Project Saved!',
+                description: 'Your project has been successfully saved.'
+            });
+            router.push(`/project/${newProjectId}`);
+        } catch (error) {
+             console.error("Error saving project:", error);
+            toast({
+                variant: "destructive",
+                title: "Save Error",
+                description: "Could not save your project. Please try again.",
+            });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
 
     const handleCopy = (content: string, type: string) => {
         if (!content) return;
@@ -59,7 +107,7 @@ export function ProjectSetupDisplay({ finalSummary, onComplete }: ProjectSetupDi
                 </div>
                 <CardTitle className="font-headline text-3xl text-center">Your Development Brief</CardTitle>
                 <CardDescription className="text-center">
-                    Here is a setup prompt for the AI and a recommended file structure. Next, you can generate code for each feature.
+                    Here is the final plan. Give your project a name, save it, and start generating feature prompts.
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
@@ -76,6 +124,15 @@ export function ProjectSetupDisplay({ finalSummary, onComplete }: ProjectSetupDi
                     </div>
                 ) : (
                     <>
+                        <div className="space-y-2">
+                            <Label htmlFor="project-name" className="text-lg">Project Name</Label>
+                             <Input
+                                id="project-name"
+                                placeholder="e.g., 'My Awesome Coffee Finder App'"
+                                value={projectName}
+                                onChange={(e) => setProjectName(e.target.value)}
+                            />
+                        </div>
                         <div>
                             <div className="flex items-center justify-between mb-2">
                                 <h3 className="text-xl font-semibold flex items-center gap-2"><FileCode /> Setup Prompt</h3>
@@ -85,7 +142,7 @@ export function ProjectSetupDisplay({ finalSummary, onComplete }: ProjectSetupDi
                             </div>
                             <Textarea
                                 value={setupPromptContent}
-                                onChange={(e) => setSetupPromptContent(e.target.value)}
+                                readOnly
                                 rows={15}
                                 className="font-mono text-sm bg-background/50"
                             />
@@ -99,16 +156,22 @@ export function ProjectSetupDisplay({ finalSummary, onComplete }: ProjectSetupDi
                             </div>
                             <Textarea
                                 value={fileStructure}
-                                onChange={(e) => setFileStructure(e.target.value)}
+                                readOnly
                                 rows={15}
                                 className="font-mono text-sm bg-background/50"
                             />
                         </div>
                     </>
                 )}
-                 <Button onClick={() => onComplete(setupPromptContent)} className="w-full text-lg py-6" size="lg" disabled={isLoading}>
-                    Start Feature Generation
-                    <ChevronRight className="ml-2" />
+                 <Button onClick={handleSave} className="w-full text-lg py-6" size="lg" disabled={isLoading || isSaving}>
+                    {isSaving ? (
+                        <Loader2 className="mr-2 animate-spin" />
+                    ) : user ? (
+                        <Save className="mr-2" />
+                    ) : (
+                        <LogIn className="mr-2" />
+                    )}
+                    {isSaving ? 'Saving...' : (user ? 'Save Project & Continue' : 'Sign In to Save')}
                  </Button>
             </CardContent>
         </Card>

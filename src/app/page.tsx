@@ -8,9 +8,9 @@ import { SummaryDisplay } from "@/components/summary-display";
 import { TechStackForm } from "@/components/tech-stack-form";
 import { Progress } from "@/components/ui/progress";
 import { ProjectSetupDisplay } from "@/components/project-setup-display";
-import { FeatureGenerationDisplay } from "@/components/feature-generation-display";
+import { useRouter } from "next/navigation";
 
-type Step = "idea" | "ui_ux" | "features" | "flow_extras" | "tech_stack" | "summary" | "setup" | "generation";
+type Step = "idea" | "ui_ux" | "features" | "flow_extras" | "tech_stack" | "summary" | "setup";
 type McqAnswers = Record<string, string>;
 
 const EMPTY_ANSWERS = {};
@@ -24,12 +24,13 @@ export default function Home() {
   const [flowAnswers, setFlowAnswers] = useState<McqAnswers>({});
   const [techStack, setTechStack] = useState<string[]>([]);
   const [finalSummary, setFinalSummary] = useState("");
-  const [setupPrompt, setSetupPrompt] = useState("");
+  
+  const router = useRouter();
 
-  const steps: Step[] = ["idea", "ui_ux", "features", "flow_extras", "tech_stack", "summary", "setup", "generation"];
+  const steps: Step[] = ["idea", "ui_ux", "features", "flow_extras", "tech_stack", "summary", "setup"];
   const currentStepIndex = steps.indexOf(step);
-  const totalProgressSteps = steps.indexOf("summary");
-  const progressValue = (currentStepIndex / totalProgressSteps) * 100;
+  const totalProgressSteps = steps.length;
+  const progressValue = ((currentStepIndex + 1) / totalProgressSteps) * 100;
 
   const handleIdeaExtracted = useCallback((summary: string) => {
     setIdeaSummary(summary);
@@ -59,11 +60,6 @@ export default function Home() {
   const handleSummaryComplete = useCallback((summary: string) => {
     setFinalSummary(summary);
     setStep("setup");
-  }, []);
-  
-  const handleSetupComplete = useCallback((prompt: string) => {
-    setSetupPrompt(prompt);
-    setStep("generation");
   }, []);
 
   const flowExtrasPreviousAnswers = useMemo(() => ({ ...uiUxAnswers, ...featureAnswers }), [uiUxAnswers, featureAnswers]);
@@ -111,9 +107,7 @@ export default function Home() {
           />
         );
       case "setup":
-        return <ProjectSetupDisplay finalSummary={finalSummary} onComplete={handleSetupComplete} />;
-      case "generation":
-        return <FeatureGenerationDisplay setupPrompt={setupPrompt} />;
+        return <ProjectSetupDisplay finalSummary={finalSummary} />;
       default:
         return null;
     }
@@ -124,7 +118,7 @@ export default function Home() {
       <AppHeader />
       <main className="flex-grow container mx-auto px-4 py-8 md:py-12">
         <div className="max-w-3xl mx-auto">
-          {currentStepIndex < totalProgressSteps && (
+          {step !== "setup" && (
             <div className="mb-8">
               <Progress value={progressValue} className="w-full" />
               <p className="text-center text-sm text-muted-foreground mt-2">Step {currentStepIndex + 1} of {totalProgressSteps}</p>

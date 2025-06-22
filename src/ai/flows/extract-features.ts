@@ -33,7 +33,9 @@ const prompt = ai.definePrompt({
   name: 'extractFeaturesPrompt',
   input: {schema: ExtractFeaturesInputSchema},
   output: {schema: ExtractFeaturesOutputSchema},
-  prompt: `You are an expert at parsing technical documents. Your task is to extract the features from the "Key Features" section of the provided setup prompt.
+  prompt: `You are an expert at parsing technical documents and planning software projects. Your task is to extract the features from the "Key Features" section of the provided setup prompt.
+
+Crucially, you must order these features in a logical sequence for development. For example, foundational features like "User Authentication" or "Database Schema Setup" should come before features that depend on them.
 
 For each feature, provide a concise but descriptive title and a detailed, one-paragraph description of what the feature entails based on the user's plan.
 

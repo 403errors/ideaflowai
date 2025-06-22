@@ -30,9 +30,9 @@ const prompt = ai.definePrompt({
   name: 'generateFeaturePrompt',
   input: {schema: GenerateFeaturePromptInputSchema},
   output: {schema: GenerateFeaturePromptOutputSchema},
-  prompt: `You are an expert prompt engineer specializing in creating instructions for AI code generators. Your task is to create a detailed and sophisticated prompt that will instruct an AI assistant to generate production-quality code for a specific feature.
+  prompt: `You are an expert prompt engineer specializing in creating instructions for AI code generators. Your task is to create a detailed, consistent, and sophisticated prompt that will instruct an AI assistant to generate production-quality code for a specific feature.
 
-The generated prompt should be a standalone set of instructions for another LLM.
+The generated prompt should be a standalone set of instructions for another LLM. It is part of a sequence, so it MUST be consistent with the overall application plan and assume previously generated features are already implemented.
 
 **Overall Application Plan (for context):**
 ---
@@ -44,11 +44,11 @@ The generated prompt should be a standalone set of instructions for another LLM.
 - **Description:** {{{featureDescription}}}
 
 **Your Task:**
-Generate a new, detailed prompt that an AI developer can use to write the code for the feature described above. This new prompt should include:
-1.  A clear summary of the feature to be built.
-2.  Specific instructions on which files to create or modify.
+Generate a new, detailed prompt that an AI developer can use to write the code for the feature described above. This new prompt must be VERY consistent with the plan and include:
+1.  A clear summary of the feature to be built and how it fits into the overall application.
+2.  Specific instructions on which files to create or modify, maintaining consistency with the project structure.
 3.  Guidance on using the recommended tech stack (Next.js, React, TypeScript, ShadCN UI, Tailwind CSS).
-4.  Instructions on component structure, props, and state management.
+4.  Instructions on component structure, props, and state management that align with previously defined patterns.
 5.  Mention the use of Lucide React for icons and \`https://placehold.co\` for placeholder images.
 6.  A reminder to follow best practices like creating reusable components, using server components where possible, and ensuring code is clean and without comments.
 7.  The final output from you should be ONLY the text of the generated prompt. Do not wrap it in markdown or anything else.

@@ -29,18 +29,18 @@ const prompt = ai.definePrompt({
   name: 'generateProjectSetupPrompt',
   input: {schema: GenerateProjectSetupInputSchema},
   output: {schema: GenerateProjectSetupOutputSchema},
-  prompt: `You are a senior software engineer tasked with creating a clear and concise "Setup Prompt" for a development team. This document will guide the subsequent feature-by-feature code generation.
+  prompt: `You are a senior software engineer tasked with creating a comprehensive "Setup Prompt" for an AI developer. This document is the foundational blueprint and MUST contain all necessary information to begin the project.
 
 Based on the final application plan provided below, generate two things:
 1.  A "Setup Prompt" document.
 2.  A recommended file structure for a Next.js project.
 
 **Setup Prompt Instructions:**
-The Setup Prompt must strictly adhere to the information from the user's plan. It should be written in markdown and must include the following sections ONLY:
+The Setup Prompt must be a complete and self-contained set of initial instructions. It must strictly adhere to the information from the user's plan and include the following sections ONLY:
 - **Core Idea**: A brief summary of the application.
 - **Objectives**: The main goals the application aims to achieve.
-- **Key Features**: A list of the core features and functionalities.
-- **User Flow**: A description of the user's journey through the app.
+- **Key Features**: A comprehensive list of the core features and functionalities. This section is critical.
+- **User Flow**: A detailed description of the user's journey through the app.
 - **Recommended Tech Stack**: The technology stack chosen for the application. If none was selected, state that.
 
 **File Structure Instructions:**

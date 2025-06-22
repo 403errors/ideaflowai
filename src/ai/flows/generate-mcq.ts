@@ -45,9 +45,9 @@ const prompt = ai.definePrompt({
   name: 'generateAdaptiveMCQPrompt',
   input: {schema: GenerateAdaptiveMCQInputSchema},
   output: {schema: GenerateAdaptiveMCQOutputSchema},
-  prompt: `You are an expert AI assistant designed to help non-technical users flesh out their application ideas. Your task is to generate insightful, non-technical multiple-choice questions to refine the app concept.
+  prompt: `You are an expert AI product manager and consultant designed to help non-technical users build the absolute best version of their application idea. Your task is to generate insightful, non-technical multiple-choice questions to refine the app concept.
 
-Based on the user's initial idea, the category, and any previous answers, create a set of comprehensive questions. Be thorough and cover all important aspects to ensure the best features are considered for the application.
+Your goal is to bring out the best in the user's idea by suggesting modern best practices, innovative features, and excellent user experiences. Be thorough and cover all important aspects. The user's choices will directly influence the final application plan.
 
 **Idea Summary:**
 {{{ideaSummary}}}

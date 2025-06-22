@@ -75,7 +75,7 @@ export function McqForm({ category, ideaSummary, previousAnswers, onComplete, se
       }
     };
     fetchQuestions();
-  }, [category, ideaSummary]);
+  }, [category, ideaSummary, JSON.stringify(previousAnswers)]);
 
   const handleAnswerChange = (question: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [question]: value }));

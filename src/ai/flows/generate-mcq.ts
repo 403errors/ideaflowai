@@ -18,9 +18,9 @@ const GenerateAdaptiveMCQInputSchema = z.object({
     .enum(['UI/UX', 'Features', 'Flow & Extras'])
     .describe('The category of questions to generate.'),
   previousAnswers: z
-    .record(z.any())
+    .record(z.string(), z.string())
     .optional()
-    .describe('The previous answers provided by the user.'),
+    .describe('The previous answers provided by the user, mapping question to answer.'),
 });
 
 export type GenerateAdaptiveMCQInput = z.infer<typeof GenerateAdaptiveMCQInputSchema>;
@@ -51,7 +51,15 @@ const prompt = ai.definePrompt({
 
   Idea Summary: {{{ideaSummary}}}
   Category: {{{category}}}
-  Previous Answers: {{#if previousAnswers}}{{{JSON.stringify previousAnswers}}}{{else}}None{{/if}}
+
+  Previous Answers:
+  {{#if previousAnswers}}
+    {{#each previousAnswers}}
+- "{{@key}}": "{{this}}"
+    {{/each}}
+  {{else}}
+  None
+  {{/if}}
 
   Exclude any topics already covered in the idea summary or previous answers.
 

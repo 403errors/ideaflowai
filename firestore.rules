@@ -1,8 +1,12 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /projects/{projectId} {
+      // Users can create a project if they are the owner
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+
+      // Users can read, update, or delete their own projects
       allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
     }
   }

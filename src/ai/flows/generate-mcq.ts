@@ -66,7 +66,7 @@ const prompt = ai.definePrompt({
   Format the output as a JSON object with a "questions" array. Each question object should include:
   - "question": The multiple-choice question.
   - "options": An array of possible answers (at least 3).
-  - "recommendedOption": The option the AI recommends.
+  - "recommendedOption": The option the AI recommends. Make sure this recommended option is one of the provided options.
 
   Ensure the questions are non-technical and easy for a non-developer to understand.
   `,
@@ -78,8 +78,23 @@ const generateAdaptiveMCQFlow = ai.defineFlow(
     inputSchema: GenerateAdaptiveMCQInputSchema,
     outputSchema: GenerateAdaptiveMCQOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
+  async (input) => {
+    const { output } = await prompt(input);
+    
+    if (!output || !output.questions) {
+      return { questions: [] };
+    }
+
+    const validatedQuestions = output.questions.map(q => {
+      // Ensure the recommended option is actually in the options list.
+      // If not, default to the first option.
+      if (q.options && !q.options.includes(q.recommendedOption)) {
+        return { ...q, recommendedOption: q.options[0] || "" };
+      }
+      return q;
+    }).filter(q => q.question && q.options && q.options.length > 0);
+
+
+    return { questions: validatedQuestions };
   }
 );

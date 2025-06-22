@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { GenerateAdaptiveMCQOutput } from "@/ai/flows/generate-mcq";
 import { AppHeader } from "@/components/app-header";
 import { IdeaForm } from "@/components/idea-form";
@@ -11,6 +11,8 @@ import { Progress } from "@/components/ui/progress";
 
 type Step = "idea" | "ui_ux" | "features" | "flow_extras" | "tech_stack" | "summary";
 type McqAnswers = Record<string, string>;
+
+const EMPTY_ANSWERS = {};
 
 export default function Home() {
   const [step, setStep] = useState<Step>("idea");
@@ -51,6 +53,8 @@ export default function Home() {
     setStep("summary");
   };
 
+  const flowExtrasPreviousAnswers = useMemo(() => ({ ...uiUxAnswers, ...featureAnswers }), [uiUxAnswers, featureAnswers]);
+
   const renderStep = () => {
     switch (step) {
       case "idea":
@@ -60,7 +64,7 @@ export default function Home() {
           <McqForm
             category="UI/UX"
             ideaSummary={ideaSummary}
-            previousAnswers={{}}
+            previousAnswers={EMPTY_ANSWERS}
             onComplete={handleUiUxComplete}
             setLoading={setLoading}
           />
@@ -70,7 +74,7 @@ export default function Home() {
           <McqForm
             category="Features"
             ideaSummary={ideaSummary}
-            previousAnswers={{ ...uiUxAnswers }}
+            previousAnswers={uiUxAnswers}
             onComplete={handleFeaturesComplete}
             setLoading={setLoading}
           />
@@ -80,7 +84,7 @@ export default function Home() {
           <McqForm
             category="Flow & Extras"
             ideaSummary={ideaSummary}
-            previousAnswers={{ ...uiUxAnswers, ...featureAnswers }}
+            previousAnswers={flowExtrasPreviousAnswers}
             onComplete={handleFlowExtrasComplete}
             setLoading={setLoading}
           />

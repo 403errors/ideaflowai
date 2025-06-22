@@ -45,30 +45,38 @@ const prompt = ai.definePrompt({
   name: 'generateAdaptiveMCQPrompt',
   input: {schema: GenerateAdaptiveMCQInputSchema},
   output: {schema: GenerateAdaptiveMCQOutputSchema},
-  prompt: `You are an AI assistant designed to generate non-technical multiple-choice questions for app development.
+  prompt: `You are an expert AI assistant designed to help non-technical users flesh out their application ideas. Your task is to generate insightful, non-technical multiple-choice questions to refine the app concept.
 
-  Based on the user's initial idea and previous answers, create questions to refine the app concept.
+Based on the user's initial idea, the category, and any previous answers, create a set of comprehensive questions. Be thorough and cover all important aspects to ensure the best features are considered for the application.
 
-  Idea Summary: {{{ideaSummary}}}
-  Category: {{{category}}}
+**Idea Summary:**
+{{{ideaSummary}}}
 
-  Previous Answers:
-  {{#if previousAnswers}}
-    {{#each previousAnswers}}
+**Category:**
+{{{category}}}
+
+**Previous Answers (for context):**
+{{#if previousAnswers}}
+  {{#each previousAnswers}}
 - "{{@key}}": "{{this}}"
-    {{/each}}
-  {{else}}
-  None
-  {{/if}}
+  {{/each}}
+{{else}}
+None
+{{/if}}
 
-  Exclude any topics already covered in the idea summary or previous answers.
+**Your Goal for the '{{{category}}}' category:**
+- **For 'UI/UX':** Generate questions about the overall aesthetic (e.g., modern, minimalist, playful), branding, user feedback mechanisms (e.g., ratings, contact forms), accessibility considerations, and the desired emotional response from users.
+- **For 'Features':** Generate questions about core functionalities, "nice-to-have" features, potential monetization strategies (e.g., ads, subscriptions, one-time purchase), data handling/privacy, and user account management.
+- **For 'Flow & Extras':** Generate questions that map out the user journey from start to finish. This includes onboarding, primary user actions, and potential integrations like social media sharing, push notifications, or third-party services.
 
-  Format the output as a JSON object with a "questions" array. Each question object should include:
-  - "question": The multiple-choice question.
-  - "options": An array of possible answers (at least 3).
-  - "recommendedOption": The option the AI recommends. Make sure this recommended option is one of the provided options.
-
-  Ensure the questions are non-technical and easy for a non-developer to understand.
+**Important Rules:**
+1.  **Do not repeat questions** or cover topics that are clearly defined in the idea summary or previous answers.
+2.  All questions must be **easy for a non-developer to understand.** Avoid jargon.
+3.  Format the output as a JSON object with a "questions" array.
+4.  Each question object must include:
+    - "question": The multiple-choice question.
+    - "options": An array of at least 3 distinct answers.
+    - "recommendedOption": The option the AI recommends based on modern best practices. **This must be one of the provided options.**
   `,
 });
 

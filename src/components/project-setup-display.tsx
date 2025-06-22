@@ -14,7 +14,7 @@ interface ProjectSetupDisplayProps {
 }
 
 export function ProjectSetupDisplay({ finalSummary }: ProjectSetupDisplayProps) {
-    const [readmeContent, setReadmeContent] = useState('');
+    const [setupPromptContent, setSetupPromptContent] = useState('');
     const [fileStructure, setFileStructure] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const { toast } = useToast();
@@ -25,7 +25,7 @@ export function ProjectSetupDisplay({ finalSummary }: ProjectSetupDisplayProps) 
             setIsLoading(true);
             try {
                 const result = await generateProjectSetup({ finalSummary });
-                setReadmeContent(result.readmeContent);
+                setSetupPromptContent(result.setupPromptContent);
                 setFileStructure(result.fileStructure);
             } catch (error) {
                 console.error("Error generating project setup:", error);
@@ -56,9 +56,9 @@ export function ProjectSetupDisplay({ finalSummary }: ProjectSetupDisplayProps) 
                 <div className="flex justify-center mb-4">
                     <Rocket className="w-16 h-16 text-primary" />
                 </div>
-                <CardTitle className="font-headline text-3xl text-center">Project Setup</CardTitle>
+                <CardTitle className="font-headline text-3xl text-center">Your Development Brief</CardTitle>
                 <CardDescription className="text-center">
-                    Here's a recommended project setup. Next, you can generate code for each feature.
+                    Here is a setup prompt for the AI and a recommended file structure. Next, you can generate code for each feature.
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
@@ -77,14 +77,14 @@ export function ProjectSetupDisplay({ finalSummary }: ProjectSetupDisplayProps) 
                     <>
                         <div>
                             <div className="flex items-center justify-between mb-2">
-                                <h3 className="text-xl font-semibold flex items-center gap-2"><FileCode /> README.md</h3>
-                                <Button variant="ghost" size="sm" onClick={() => handleCopy(readmeContent, "README")}>
+                                <h3 className="text-xl font-semibold flex items-center gap-2"><FileCode /> Setup Prompt</h3>
+                                <Button variant="ghost" size="sm" onClick={() => handleCopy(setupPromptContent, "Setup Prompt")}>
                                     <Copy className="mr-2 h-4 w-4" /> Copy
                                 </Button>
                             </div>
                             <Textarea
-                                value={readmeContent}
-                                onChange={(e) => setReadmeContent(e.target.value)}
+                                value={setupPromptContent}
+                                onChange={(e) => setSetupPromptContent(e.target.value)}
                                 rows={15}
                                 className="font-mono text-sm bg-background/50"
                             />

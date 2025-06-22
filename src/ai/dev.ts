@@ -7,4 +7,4 @@ import '@/ai/flows/recommend-tech-stack.ts';
 import '@/ai/flows/generate-final-summary.ts';
 import '@/ai/flows/generate-project-setup.ts';
 import '@/ai/flows/extract-features.ts';
-import '@/ai/flows/generate-code.ts';
+import '@/ai/flows/generate-feature-prompt.ts';

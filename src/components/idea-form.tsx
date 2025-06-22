@@ -7,13 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Paperclip, Send } from "lucide-react";
+import { Loader2, Paperclip, Send } from "lucide-react";
 import { useState, type ChangeEvent, type FormEvent, useCallback } from "react";
+import { Skeleton } from "./ui/skeleton";
 
 interface IdeaFormProps {
   onIdeaExtracted: (summary: string) => void;
-  setLoading: (loading: boolean) => void;
-  setLoadingReason: (reason: string) => void;
 }
 
 const fileToDataURL = (file: File): Promise<string> => {
@@ -25,10 +24,12 @@ const fileToDataURL = (file: File): Promise<string> => {
   });
 };
 
-export function IdeaForm({ onIdeaExtracted, setLoading, setLoadingReason }: IdeaFormProps) {
+export function IdeaForm({ onIdeaExtracted }: IdeaFormProps) {
   const [ideaText, setIdeaText] = useState("");
   const [fileName, setFileName] = useState("");
   const [ideaInput, setIdeaInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingReason, setLoadingReason] = useState("");
   const { toast } = useToast();
 
   const handleFileChange = useCallback(async (e: ChangeEvent<HTMLInputElement>) => {
@@ -36,7 +37,7 @@ export function IdeaForm({ onIdeaExtracted, setLoading, setLoadingReason }: Idea
     if (file) {
       try {
         setLoadingReason("Reading your file...");
-        setLoading(true);
+        setIsLoading(true);
         const dataUrl = await fileToDataURL(file);
         setIdeaInput(dataUrl);
         setIdeaText(`File uploaded: ${file.name}`);
@@ -48,10 +49,10 @@ export function IdeaForm({ onIdeaExtracted, setLoading, setLoadingReason }: Idea
           description: "Could not process the uploaded file.",
         });
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     }
-  }, [setLoading, setLoadingReason, toast]);
+  }, [toast]);
 
   const handleSubmit = useCallback(async (e: FormEvent) => {
     e.preventDefault();
@@ -66,7 +67,7 @@ export function IdeaForm({ onIdeaExtracted, setLoading, setLoadingReason }: Idea
     }
 
     setLoadingReason("Extracting the core concepts from your idea...");
-    setLoading(true);
+    setIsLoading(true);
     try {
       const result = await extractIdea({ input: finalInput });
       onIdeaExtracted(result.markdownOutput);
@@ -77,10 +78,31 @@ export function IdeaForm({ onIdeaExtracted, setLoading, setLoadingReason }: Idea
         title: "AI Error",
         description: "Failed to process your idea. Please try again.",
       });
-    } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  }, [ideaInput, ideaText, onIdeaExtracted, setLoading, setLoadingReason, toast]);
+    // Don't setIsLoading(false) here, as the component will unmount on success
+  }, [ideaInput, ideaText, onIdeaExtracted, toast]);
+  
+  if (isLoading) {
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="font-headline text-3xl">Let's build your app</CardTitle>
+          <CardDescription>
+            Start by describing your idea. You can write it down, or upload an image or PDF.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+           <div className="flex flex-col items-center justify-center h-96">
+              <Loader2 className="w-16 h-16 text-primary animate-spin" />
+              <p className="mt-4 text-lg font-headline">AI is thinking...</p>
+              <p className="mt-2 text-center text-muted-foreground">{loadingReason}</p>
+           </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
 
   return (
     <Card className="w-full animate-in fade-in-50">

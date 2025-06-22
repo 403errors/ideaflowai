@@ -1,33 +1,33 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import type { GenerateAdaptiveMCQOutput } from "@/ai/flows/generate-mcq";
 import { AppHeader } from "@/components/app-header";
 import { IdeaForm } from "@/components/idea-form";
 import { McqForm } from "@/components/mcq-form";
 import { SummaryDisplay } from "@/components/summary-display";
 import { TechStackForm } from "@/components/tech-stack-form";
 import { Progress } from "@/components/ui/progress";
+import { ProjectSetupDisplay } from "@/components/project-setup-display";
 
-type Step = "idea" | "ui_ux" | "features" | "flow_extras" | "tech_stack" | "summary";
+type Step = "idea" | "ui_ux" | "features" | "flow_extras" | "tech_stack" | "summary" | "setup";
 type McqAnswers = Record<string, string>;
 
 const EMPTY_ANSWERS = {};
 
 export default function Home() {
   const [step, setStep] = useState<Step>("idea");
-  const [loading, setLoading] = useState(false);
-  const [loadingReason, setLoadingReason] = useState("AI is thinking...");
   
   const [ideaSummary, setIdeaSummary] = useState("");
   const [uiUxAnswers, setUiUxAnswers] = useState<McqAnswers>({});
   const [featureAnswers, setFeatureAnswers] = useState<McqAnswers>({});
   const [flowAnswers, setFlowAnswers] = useState<McqAnswers>({});
   const [techStack, setTechStack] = useState<string[]>([]);
+  const [finalSummary, setFinalSummary] = useState("");
 
-  const steps: Step[] = ["idea", "ui_ux", "features", "flow_extras", "tech_stack", "summary"];
+  const steps: Step[] = ["idea", "ui_ux", "features", "flow_extras", "tech_stack", "summary", "setup"];
   const currentStepIndex = steps.indexOf(step);
-  const progressValue = ((currentStepIndex + 1) / steps.length) * 100;
+  const totalProgressSteps = steps.indexOf("summary");
+  const progressValue = (currentStepIndex / totalProgressSteps) * 100;
 
   const handleIdeaExtracted = useCallback((summary: string) => {
     setIdeaSummary(summary);
@@ -54,12 +54,17 @@ export default function Home() {
     setStep("summary");
   }, []);
 
+  const handleSummaryComplete = useCallback((summary: string) => {
+    setFinalSummary(summary);
+    setStep("setup");
+  }, []);
+
   const flowExtrasPreviousAnswers = useMemo(() => ({ ...uiUxAnswers, ...featureAnswers }), [uiUxAnswers, featureAnswers]);
 
   const renderStep = () => {
     switch (step) {
       case "idea":
-        return <IdeaForm onIdeaExtracted={handleIdeaExtracted} setLoading={setLoading} setLoadingReason={setLoadingReason} />;
+        return <IdeaForm onIdeaExtracted={handleIdeaExtracted} />;
       case "ui_ux":
         return (
           <McqForm
@@ -95,8 +100,11 @@ export default function Home() {
             ideaSummary={ideaSummary}
             answers={{ ...uiUxAnswers, ...featureAnswers, ...flowAnswers }}
             techStack={techStack}
+            onComplete={handleSummaryComplete}
           />
         );
+      case "setup":
+        return <ProjectSetupDisplay finalSummary={finalSummary} />;
       default:
         return null;
     }
@@ -107,21 +115,13 @@ export default function Home() {
       <AppHeader />
       <main className="flex-grow container mx-auto px-4 py-8 md:py-12">
         <div className="max-w-3xl mx-auto">
-          {step !== "summary" && (
+          {currentStepIndex < totalProgressSteps && (
             <div className="mb-8">
               <Progress value={progressValue} className="w-full" />
-              <p className="text-center text-sm text-muted-foreground mt-2">Step {currentStepIndex + 1} of {steps.length -1}</p>
+              <p className="text-center text-sm text-muted-foreground mt-2">Step {currentStepIndex + 1} of {totalProgressSteps}</p>
             </div>
           )}
-          {loading ? (
-             <div className="flex flex-col items-center justify-center h-96">
-                <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                <p className="mt-4 text-lg font-headline">AI is thinking...</p>
-                <p className="mt-2 text-center text-muted-foreground">{loadingReason}</p>
-             </div>
-          ) : (
-            renderStep()
-          )}
+          {renderStep()}
         </div>
       </main>
     </div>

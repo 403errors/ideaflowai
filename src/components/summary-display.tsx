@@ -7,16 +7,17 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, PartyPopper } from "lucide-react";
+import { Copy, PartyPopper, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface SummaryDisplayProps {
   ideaSummary: string;
   answers: Record<string, string>;
   techStack: string[];
+  onComplete: (summary: string) => void;
 }
 
-export function SummaryDisplay({ ideaSummary, answers, techStack }: SummaryDisplayProps) {
+export function SummaryDisplay({ ideaSummary, answers, techStack, onComplete }: SummaryDisplayProps) {
     const [summary, setSummary] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const { toast } = useToast();
@@ -34,7 +35,6 @@ export function SummaryDisplay({ ideaSummary, answers, techStack }: SummaryDispl
                     title: "AI Error",
                     description: "Could not generate the final summary. Please try again.",
                 });
-                // Fallback to a simple summary
                 setSummary("Failed to generate a detailed summary. Here's a basic outline:\n\n" + ideaSummary);
             } finally {
                 setIsLoading(false);
@@ -51,6 +51,10 @@ export function SummaryDisplay({ ideaSummary, answers, techStack }: SummaryDispl
             title: "Copied to clipboard!",
             description: "Your application plan is ready to be shared.",
         });
+    };
+
+    const handleContinue = () => {
+        onComplete(summary);
     };
 
     return (
@@ -87,10 +91,16 @@ export function SummaryDisplay({ ideaSummary, answers, techStack }: SummaryDispl
                         />
                     </div>
                 )}
-                <Button onClick={handleCopy} className="w-full text-lg py-6" size="lg" disabled={isLoading}>
-                    <Copy className="mr-2" />
-                    Copy Plan
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-4">
+                    <Button onClick={handleCopy} className="w-full" size="lg" variant="outline" disabled={isLoading}>
+                        <Copy className="mr-2" />
+                        Copy Plan
+                    </Button>
+                    <Button onClick={handleContinue} className="w-full" size="lg" disabled={isLoading}>
+                        Next: Generate Project Setup
+                        <ChevronRight className="ml-2" />
+                    </Button>
+                </div>
             </CardContent>
         </Card>
     );

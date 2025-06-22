@@ -3,7 +3,6 @@
 import { collection, addDoc, getDocs, query, where, doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Project } from '@/types';
-import type { User } from 'firebase/auth';
 
 interface ProjectData {
   userId: string;
@@ -13,7 +12,7 @@ interface ProjectData {
   fileStructure: string;
 }
 
-export async function createUserProfile(user: User): Promise<void> {
+export async function createUserProfile(user: { uid: string; email: string | null; displayName: string | null; photoURL: string | null; }): Promise<void> {
   const userRef = doc(db, 'users', user.uid);
   const docSnap = await getDoc(userRef);
 

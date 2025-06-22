@@ -11,11 +11,9 @@ import { Label } from "./ui/label";
 
 interface TechStackFormProps {
   onComplete: (techStack: string[]) => void;
-  setLoading: (loading: boolean) => void;
-  setLoadingReason: (reason: string) => void;
 }
 
-export function TechStackForm({ onComplete, setLoading, setLoadingReason }: TechStackFormProps) {
+export function TechStackForm({ onComplete }: TechStackFormProps) {
   const [includeTechStack, setIncludeTechStack] = useState(true);
   const [techStacks, setTechStacks] = useState<string[]>([]);
   const [isFetching, setIsFetching] = useState(false);
@@ -23,8 +21,6 @@ export function TechStackForm({ onComplete, setLoading, setLoadingReason }: Tech
 
   const fetchTechStack = useCallback(async () => {
       setIsFetching(true);
-      setLoadingReason("Analyzing application type to recommend technologies...");
-      setLoading(true);
       try {
           const result = await recommendTechStack({ applicationType: "web" });
           setTechStacks(result.techStacks);
@@ -37,9 +33,8 @@ export function TechStackForm({ onComplete, setLoading, setLoadingReason }: Tech
           });
       } finally {
           setIsFetching(false);
-          setLoading(false);
       }
-  }, [setLoading, setLoadingReason, toast]);
+  }, [toast]);
 
   useEffect(() => {
     if (includeTechStack) {

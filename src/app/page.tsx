@@ -67,8 +67,6 @@ export default function Home() {
             ideaSummary={ideaSummary}
             previousAnswers={EMPTY_ANSWERS}
             onComplete={handleUiUxComplete}
-            setLoading={setLoading}
-            setLoadingReason={setLoadingReason}
           />
         );
       case "features":
@@ -78,8 +76,6 @@ export default function Home() {
             ideaSummary={ideaSummary}
             previousAnswers={uiUxAnswers}
             onComplete={handleFeaturesComplete}
-            setLoading={setLoading}
-            setLoadingReason={setLoadingReason}
           />
         );
       case "flow_extras":
@@ -89,12 +85,10 @@ export default function Home() {
             ideaSummary={ideaSummary}
             previousAnswers={flowExtrasPreviousAnswers}
             onComplete={handleFlowExtrasComplete}
-            setLoading={setLoading}
-            setLoadingReason={setLoadingReason}
           />
         );
       case "tech_stack":
-        return <TechStackForm onComplete={handleTechStackComplete} setLoading={setLoading} setLoadingReason={setLoadingReason} />;
+        return <TechStackForm onComplete={handleTechStackComplete} />;
       case "summary":
         return (
           <SummaryDisplay

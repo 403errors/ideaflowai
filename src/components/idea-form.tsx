@@ -77,6 +77,7 @@ export function IdeaForm({ onIdeaExtracted, setLoading, setLoadingReason }: Idea
         title: "AI Error",
         description: "Failed to process your idea. Please try again.",
       });
+    } finally {
       setLoading(false);
     }
   }, [ideaInput, ideaText, onIdeaExtracted, setLoading, setLoadingReason, toast]);

@@ -6,3 +6,4 @@ import '@/ai/flows/generate-mcq.ts';
 import '@/ai/flows/recommend-tech-stack.ts';
 import '@/ai/flows/generate-final-summary.ts';
 import '@/ai/flows/generate-project-setup.ts';
+import '@/ai/flows/extract-features.ts';

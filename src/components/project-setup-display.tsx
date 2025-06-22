@@ -11,9 +11,10 @@ import { useEffect, useState } from "react";
 
 interface ProjectSetupDisplayProps {
   finalSummary: string;
+  onComplete: (setupPromptContent: string) => void;
 }
 
-export function ProjectSetupDisplay({ finalSummary }: ProjectSetupDisplayProps) {
+export function ProjectSetupDisplay({ finalSummary, onComplete }: ProjectSetupDisplayProps) {
     const [setupPromptContent, setSetupPromptContent] = useState('');
     const [fileStructure, setFileStructure] = useState('');
     const [isLoading, setIsLoading] = useState(true);
@@ -105,8 +106,8 @@ export function ProjectSetupDisplay({ finalSummary }: ProjectSetupDisplayProps) 
                         </div>
                     </>
                 )}
-                 <Button onClick={() => toast({ title: "Coming Soon!", description: "Feature-by-feature sequential prompt generation is next."})} className="w-full text-lg py-6" size="lg" disabled={isLoading}>
-                    Next: Generate Features Sequentially
+                 <Button onClick={() => onComplete(setupPromptContent)} className="w-full text-lg py-6" size="lg" disabled={isLoading}>
+                    Start Feature Generation
                     <ChevronRight className="ml-2" />
                  </Button>
             </CardContent>

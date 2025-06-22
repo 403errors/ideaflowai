@@ -50,16 +50,20 @@ export async function getProjects(userId: string): Promise<Project[]> {
   const q = query(projectsCol, where('userId', '==', userId));
   const querySnapshot = await getDocs(q);
   
-  const projects = querySnapshot.docs.map(doc => {
+  const projects: Project[] = querySnapshot.docs.map(doc => {
     const data = doc.data();
     return {
         id: doc.id,
-        ...data,
-        createdAt: data.createdAt?.toDate()
-    } as Project
+        userId: data.userId,
+        name: data.name,
+        finalSummary: data.finalSummary,
+        setupPrompt: data.setupPrompt,
+        fileStructure: data.fileStructure,
+        createdAt: data.createdAt.toDate().toISOString(),
+    }
   });
 
-  return projects.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  return projects.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
 
@@ -72,8 +76,12 @@ export async function getProject(projectId: string, userId: string): Promise<Pro
         if (projectData.userId === userId) {
             return {
                 id: docSnap.id,
-                ...projectData,
-                createdAt: projectData.createdAt?.toDate(),
+                userId: projectData.userId,
+                name: projectData.name,
+                finalSummary: projectData.finalSummary,
+                setupPrompt: projectData.setupPrompt,
+                fileStructure: projectData.fileStructure,
+                createdAt: projectData.createdAt.toDate().toISOString(),
             } as Project;
         }
     }

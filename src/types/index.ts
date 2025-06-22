@@ -5,7 +5,7 @@ export interface Project {
   finalSummary: string;
   setupPrompt: string;
   fileStructure: string;
-  createdAt: Date;
+  createdAt: string;
 }
 
 export interface AppUser {

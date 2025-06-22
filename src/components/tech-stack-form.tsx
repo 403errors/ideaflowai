@@ -4,24 +4,26 @@ import { recommendTechStack } from "@/ai/flows/recommend-tech-stack";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { ChevronRight, Cpu, Layers, Loader2 } from "lucide-react";
-import { useState, useEffect, type FormEvent } from "react";
+import { ChevronRight, Layers, Loader2 } from "lucide-react";
+import { useState, useEffect, type FormEvent, useCallback } from "react";
 import { Switch } from "./ui/switch";
 import { Label } from "./ui/label";
 
 interface TechStackFormProps {
   onComplete: (techStack: string[]) => void;
   setLoading: (loading: boolean) => void;
+  setLoadingReason: (reason: string) => void;
 }
 
-export function TechStackForm({ onComplete, setLoading }: TechStackFormProps) {
+export function TechStackForm({ onComplete, setLoading, setLoadingReason }: TechStackFormProps) {
   const [includeTechStack, setIncludeTechStack] = useState(true);
   const [techStacks, setTechStacks] = useState<string[]>([]);
   const [isFetching, setIsFetching] = useState(false);
   const { toast } = useToast();
 
-  const fetchTechStack = async () => {
+  const fetchTechStack = useCallback(async () => {
       setIsFetching(true);
+      setLoadingReason("Analyzing application type to recommend technologies...");
       setLoading(true);
       try {
           const result = await recommendTechStack({ applicationType: "web" });
@@ -37,13 +39,13 @@ export function TechStackForm({ onComplete, setLoading }: TechStackFormProps) {
           setIsFetching(false);
           setLoading(false);
       }
-  };
+  }, [setLoading, setLoadingReason, toast]);
 
   useEffect(() => {
     if (includeTechStack) {
       fetchTechStack();
     }
-  }, [includeTechStack]);
+  }, [includeTechStack, fetchTechStack]);
   
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();

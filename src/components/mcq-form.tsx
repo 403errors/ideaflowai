@@ -19,11 +19,12 @@ interface McqFormProps {
   previousAnswers: Record<string, any>;
   onComplete: (answers: Record<string, string>) => void;
   setLoading: (loading: boolean) => void;
+  setLoadingReason: (reason: string) => void;
 }
 
 type Question = GenerateAdaptiveMCQOutput["questions"][0];
 
-export function McqForm({ category, ideaSummary, previousAnswers, onComplete, setLoading }: McqFormProps) {
+export function McqForm({ category, ideaSummary, previousAnswers, onComplete, setLoading, setLoadingReason }: McqFormProps) {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isFetching, setIsFetching] = useState(true);
@@ -41,8 +42,15 @@ export function McqForm({ category, ideaSummary, previousAnswers, onComplete, se
     "Flow & Extras": "Finally, let's think about how users will interact with your app and any extras."
   };
 
+  const reasoningMap = {
+    "UI/UX": "Analyzing your idea to generate questions about your app's visual design and user experience.",
+    "Features": "Based on your idea and UI/UX choices, generating questions to define the core features.",
+    "Flow & Extras": "Considering all your input to create questions about user flows and additional functionalities."
+  };
+
   useEffect(() => {
     const fetchQuestions = async () => {
+      setLoadingReason(reasoningMap[category]);
       setLoading(true);
       setIsFetching(true);
       try {
@@ -69,13 +77,14 @@ export function McqForm({ category, ideaSummary, previousAnswers, onComplete, se
           title: "AI Error",
           description: "Failed to generate questions. Please try again.",
         });
+        onComplete({}); // prevent getting stuck
       } finally {
         setLoading(false);
         setIsFetching(false);
       }
     };
     fetchQuestions();
-  }, [category, ideaSummary, previousAnswers]);
+  }, [category, ideaSummary, previousAnswers, onComplete, setLoading, setLoadingReason, toast]);
 
   const handleAnswerChange = (question: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [question]: value }));

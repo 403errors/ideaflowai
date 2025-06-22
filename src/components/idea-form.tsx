@@ -8,11 +8,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Paperclip, Send } from "lucide-react";
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useState, type ChangeEvent, type FormEvent, useCallback } from "react";
 
 interface IdeaFormProps {
   onIdeaExtracted: (summary: string) => void;
   setLoading: (loading: boolean) => void;
+  setLoadingReason: (reason: string) => void;
 }
 
 const fileToDataURL = (file: File): Promise<string> => {
@@ -24,16 +25,17 @@ const fileToDataURL = (file: File): Promise<string> => {
   });
 };
 
-export function IdeaForm({ onIdeaExtracted, setLoading }: IdeaFormProps) {
+export function IdeaForm({ onIdeaExtracted, setLoading, setLoadingReason }: IdeaFormProps) {
   const [ideaText, setIdeaText] = useState("");
   const [fileName, setFileName] = useState("");
   const [ideaInput, setIdeaInput] = useState("");
   const { toast } = useToast();
 
-  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = useCallback(async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       try {
+        setLoadingReason("Reading your file...");
         setLoading(true);
         const dataUrl = await fileToDataURL(file);
         setIdeaInput(dataUrl);
@@ -49,9 +51,9 @@ export function IdeaForm({ onIdeaExtracted, setLoading }: IdeaFormProps) {
         setLoading(false);
       }
     }
-  };
+  }, [setLoading, setLoadingReason, toast]);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = useCallback(async (e: FormEvent) => {
     e.preventDefault();
     const finalInput = ideaInput || ideaText;
     if (!finalInput.trim()) {
@@ -63,6 +65,7 @@ export function IdeaForm({ onIdeaExtracted, setLoading }: IdeaFormProps) {
       return;
     }
 
+    setLoadingReason("Extracting the core concepts from your idea...");
     setLoading(true);
     try {
       const result = await extractIdea({ input: finalInput });
@@ -76,7 +79,7 @@ export function IdeaForm({ onIdeaExtracted, setLoading }: IdeaFormProps) {
       });
       setLoading(false);
     }
-  };
+  }, [ideaInput, ideaText, onIdeaExtracted, setLoading, setLoadingReason, toast]);
 
   return (
     <Card className="w-full animate-in fade-in-50">

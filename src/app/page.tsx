@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { GenerateAdaptiveMCQOutput } from "@/ai/flows/generate-mcq";
 import { AppHeader } from "@/components/app-header";
 import { IdeaForm } from "@/components/idea-form";
@@ -17,6 +17,7 @@ const EMPTY_ANSWERS = {};
 export default function Home() {
   const [step, setStep] = useState<Step>("idea");
   const [loading, setLoading] = useState(false);
+  const [loadingReason, setLoadingReason] = useState("AI is thinking...");
   
   const [ideaSummary, setIdeaSummary] = useState("");
   const [uiUxAnswers, setUiUxAnswers] = useState<McqAnswers>({});
@@ -28,37 +29,37 @@ export default function Home() {
   const currentStepIndex = steps.indexOf(step);
   const progressValue = ((currentStepIndex + 1) / steps.length) * 100;
 
-  const handleIdeaExtracted = (summary: string) => {
+  const handleIdeaExtracted = useCallback((summary: string) => {
     setIdeaSummary(summary);
     setStep("ui_ux");
-  };
+  }, []);
 
-  const handleUiUxComplete = (answers: McqAnswers) => {
+  const handleUiUxComplete = useCallback((answers: McqAnswers) => {
     setUiUxAnswers(answers);
     setStep("features");
-  };
+  }, []);
   
-  const handleFeaturesComplete = (answers: McqAnswers) => {
+  const handleFeaturesComplete = useCallback((answers: McqAnswers) => {
     setFeatureAnswers(answers);
     setStep("flow_extras");
-  };
+  }, []);
 
-  const handleFlowExtrasComplete = (answers: McqAnswers) => {
+  const handleFlowExtrasComplete = useCallback((answers: McqAnswers) => {
     setFlowAnswers(answers);
     setStep("tech_stack");
-  };
+  }, []);
   
-  const handleTechStackComplete = (stack: string[]) => {
+  const handleTechStackComplete = useCallback((stack: string[]) => {
     setTechStack(stack);
     setStep("summary");
-  };
+  }, []);
 
   const flowExtrasPreviousAnswers = useMemo(() => ({ ...uiUxAnswers, ...featureAnswers }), [uiUxAnswers, featureAnswers]);
 
   const renderStep = () => {
     switch (step) {
       case "idea":
-        return <IdeaForm onIdeaExtracted={handleIdeaExtracted} setLoading={setLoading} />;
+        return <IdeaForm onIdeaExtracted={handleIdeaExtracted} setLoading={setLoading} setLoadingReason={setLoadingReason} />;
       case "ui_ux":
         return (
           <McqForm
@@ -67,6 +68,7 @@ export default function Home() {
             previousAnswers={EMPTY_ANSWERS}
             onComplete={handleUiUxComplete}
             setLoading={setLoading}
+            setLoadingReason={setLoadingReason}
           />
         );
       case "features":
@@ -77,6 +79,7 @@ export default function Home() {
             previousAnswers={uiUxAnswers}
             onComplete={handleFeaturesComplete}
             setLoading={setLoading}
+            setLoadingReason={setLoadingReason}
           />
         );
       case "flow_extras":
@@ -87,10 +90,11 @@ export default function Home() {
             previousAnswers={flowExtrasPreviousAnswers}
             onComplete={handleFlowExtrasComplete}
             setLoading={setLoading}
+            setLoadingReason={setLoadingReason}
           />
         );
       case "tech_stack":
-        return <TechStackForm onComplete={handleTechStackComplete} setLoading={setLoading} />;
+        return <TechStackForm onComplete={handleTechStackComplete} setLoading={setLoading} setLoadingReason={setLoadingReason} />;
       case "summary":
         return (
           <SummaryDisplay
@@ -119,6 +123,7 @@ export default function Home() {
              <div className="flex flex-col items-center justify-center h-96">
                 <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
                 <p className="mt-4 text-lg font-headline">AI is thinking...</p>
+                <p className="mt-2 text-center text-muted-foreground">{loadingReason}</p>
              </div>
           ) : (
             renderStep()

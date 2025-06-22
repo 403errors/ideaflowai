@@ -5,9 +5,10 @@ import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signI
 import { app } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { createUserProfile } from '@/lib/actions';
+import type { AppUser } from '@/types';
 
 interface AuthContextType {
-  user: User | null;
+  user: AppUser | null;
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
   signInAnonymously: () => Promise<void>;
@@ -20,16 +21,25 @@ const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        await createUserProfile(user);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        await createUserProfile(firebaseUser);
+        const appUser: AppUser = {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          displayName: firebaseUser.displayName,
+          photoURL: firebaseUser.photoURL,
+          isAnonymous: firebaseUser.isAnonymous,
+        };
+        setUser(appUser);
+      } else {
+        setUser(null);
       }
-      setUser(user);
       setLoading(false);
     });
     return () => unsubscribe();

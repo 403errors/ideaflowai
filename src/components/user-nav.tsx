@@ -1,6 +1,5 @@
 'use client';
 
-import type { User } from 'firebase/auth';
 import { useAuth } from '@/contexts/auth-context';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -15,9 +14,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import Link from 'next/link';
 import { LayoutDashboard, LogOut, User as UserIcon } from 'lucide-react';
+import type { AppUser } from '@/types';
 
 interface UserNavProps {
-  user: User;
+  user: AppUser;
 }
 
 export function UserNav({ user }: UserNavProps) {
@@ -31,21 +31,23 @@ export function UserNav({ user }: UserNavProps) {
       .join('');
     return initials.slice(0, 2).toUpperCase();
   };
+  
+  const displayName = user.isAnonymous ? 'Anonymous User' : user.displayName;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={user.photoURL || ''} alt={user.displayName || 'User'} />
-            <AvatarFallback>{getInitials(user.displayName)}</AvatarFallback>
+            <AvatarImage src={user.photoURL || ''} alt={displayName || 'User'} />
+            <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user.displayName || 'Anonymous User'}</p>
+            <p className="text-sm font-medium leading-none">{displayName}</p>
             <p className="text-xs leading-none text-muted-foreground">{user.email || ''}</p>
           </div>
         </DropdownMenuLabel>

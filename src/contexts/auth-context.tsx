@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback, useMemo } from 'react';
 import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signInAnonymously as firebaseSignInAnonymously, signOut as firebaseSignOut, type User } from 'firebase/auth';
 import { app } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
@@ -45,45 +45,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = useCallback(async () => {
     setLoading(true);
     try {
       await signInWithPopup(auth, googleProvider);
       router.push('/dashboard');
     } catch (error) {
       console.error('Error signing in with Google:', error);
-    } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
 
-  const signInAnonymously = async () => {
+  const signInAnonymously = useCallback(async () => {
     setLoading(true);
     try {
       await firebaseSignInAnonymously(auth);
       router.push('/dashboard');
     } catch (error) {
       console.error('Error signing in anonymously:', error);
-    } finally {
-        setLoading(false);
+      setLoading(false);
     }
-  };
+  }, [router]);
 
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     await firebaseSignOut(auth);
     router.push('/login');
-  };
+  }, [router]);
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     loading,
     signInWithGoogle,
     signInAnonymously,
     signOut,
-  };
+  }), [user, loading, signInWithGoogle, signInAnonymously, signOut]);
 
-  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export const useAuth = (): AuthContextType => {

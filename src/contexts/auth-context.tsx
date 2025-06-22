@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signInAnonymously, signOut as firebaseSignOut, type User } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signInAnonymously as firebaseSignInAnonymously, signOut as firebaseSignOut, type User } from 'firebase/auth';
 import { app } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { createUserProfile } from '@/lib/actions';
@@ -50,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signInAnonymously = async () => {
     setLoading(true);
     try {
-      await signInAnonymously(auth);
+      await firebaseSignInAnonymously(auth);
       router.push('/dashboard');
     } catch (error) {
       console.error('Error signing in anonymously:', error);

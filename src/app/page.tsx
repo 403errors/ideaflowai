@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useAuth } from '@/contexts/auth-context';
@@ -56,7 +55,7 @@ export default function HomePage() {
       <AppHeader />
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="w-full py-20 md:py-32 text-center bg-gradient-to-b from-background to-secondary/50">
+        <section className="w-full min-h-screen flex items-center justify-center text-center bg-gradient-to-b from-background to-secondary/50">
           <div className="container mx-auto px-4">
             <div className="bg-primary/20 text-primary font-bold py-1 px-4 rounded-full inline-block mb-4">
                 Powered by Generative AI

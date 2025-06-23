@@ -17,6 +17,9 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: 'IdeaFlowAI',
   description: 'Transform your idea into a complete, LLM-driven application development workflow.',
+  openGraph: {
+    images: ['https://firebasestorage.googleapis.com/v0/b/ideaflow-ai-tt5i0.firebasestorage.app/o/ideaflow_ai_thumbnai.jpeg?alt=media&token=c18ef116-ef64-4947-b199-28f55fb1a9aa'],
+  },
 };
 
 export default function RootLayout({

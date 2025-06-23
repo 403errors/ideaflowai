@@ -47,6 +47,7 @@ The Setup Prompt must be a complete and self-contained set of initial instructio
 
 **File Structure Instructions:**
 The file structure should be represented as a markdown code block, showing the key directories and files (e.g., /src/app, /src/components, /src/lib, etc.) appropriate for the application described.
+The response for the fileStructure field MUST begin with the line "Use this file structure while developing the application..." followed by the markdown code block.
 
 **Application Plan:**
 ---

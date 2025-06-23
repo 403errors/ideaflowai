@@ -16,7 +16,7 @@ export function AppHeader() {
         <Link href="/" className="flex items-center">
             <Lightbulb className="w-8 h-8 text-primary" />
             <h1 className="ml-3 text-2xl font-bold font-headline tracking-tight">
-            IdeaFlow AI
+            IdeaFlowAI
             </h1>
         </Link>
         

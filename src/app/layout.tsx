@@ -15,7 +15,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: 'IdeaFlow AI',
+  title: 'IdeaFlowAI',
   description: 'Transform your idea into a complete, LLM-driven application development workflow.',
 };
 

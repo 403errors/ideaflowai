@@ -65,7 +65,7 @@ export default function HomePage() {
                 Turn Your Spark of an Idea into a Fully-Planned Application
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-                IdeaFlow AI guides you from a raw concept to a complete, developer-ready plan with AI-powered refinement, technical planning, and prompt generation.
+                IdeaFlowAI guides you from a raw concept to a complete, developer-ready plan with AI-powered refinement, technical planning, and prompt generation.
             </p>
             <Button size="lg" asChild>
               <Link href="/login">
@@ -79,7 +79,7 @@ export default function HomePage() {
         <section className="py-20 md:py-24">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl md:text-4xl font-bold text-center font-headline mb-12">
-              Why IdeaFlow AI?
+              Why IdeaFlowAI?
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               <Card className="text-center">
@@ -196,7 +196,7 @@ export default function HomePage() {
       </main>
       <footer className="py-6 border-t">
           <div className="container mx-auto px-4 text-center text-muted-foreground">
-            <p>&copy; {new Date().getFullYear()} IdeaFlow AI. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} IdeaFlowAI. All rights reserved.</p>
           </div>
       </footer>
     </div>

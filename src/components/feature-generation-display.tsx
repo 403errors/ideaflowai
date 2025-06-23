@@ -13,6 +13,7 @@ import { Textarea } from "./ui/textarea";
 
 interface FeatureGenerationDisplayProps {
   setupPrompt: string;
+  fileStructure: string;
 }
 
 interface Feature {
@@ -20,7 +21,7 @@ interface Feature {
   description: string;
 }
 
-export function FeatureGenerationDisplay({ setupPrompt }: FeatureGenerationDisplayProps) {
+export function FeatureGenerationDisplay({ setupPrompt, fileStructure }: FeatureGenerationDisplayProps) {
   const [features, setFeatures] = useState<Feature[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [generatedPrompts, setGeneratedPrompts] = useState<Record<string, string>>({});
@@ -54,6 +55,7 @@ export function FeatureGenerationDisplay({ setupPrompt }: FeatureGenerationDispl
     try {
       const result = await generateFeaturePrompt({
         setupPrompt,
+        fileStructure,
         featureTitle: feature.title,
         featureDescription: feature.description,
       });

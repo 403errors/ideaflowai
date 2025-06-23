@@ -109,7 +109,7 @@ export default function ProjectPage() {
               </Tabs>
             </div>
             <div>
-                <FeatureGenerationDisplay setupPrompt={project.setupPrompt} />
+                <FeatureGenerationDisplay setupPrompt={project.setupPrompt} fileStructure={project.fileStructure} />
             </div>
         </div>
       </main>

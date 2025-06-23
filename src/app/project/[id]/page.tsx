@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -79,9 +78,9 @@ export default function ProjectPage() {
             <div>
               <Tabs defaultValue="setup" className="w-full">
                 <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="setup"><FileCode className="mr-2"/>Setup Prompt</TabsTrigger>
-                  <TabsTrigger value="structure"><FolderTree className="mr-2"/>File Structure</TabsTrigger>
-                  <TabsTrigger value="plan"><FileText className="mr-2"/>Full Plan</TabsTrigger>
+                  <TabsTrigger value="setup"><FileCode />Setup Prompt</TabsTrigger>
+                  <TabsTrigger value="structure"><FolderTree />File Structure</TabsTrigger>
+                  <TabsTrigger value="plan"><FileText />Full Plan</TabsTrigger>
                 </TabsList>
                 <TabsContent value="setup">
                   <Textarea

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useAuth } from '@/contexts/auth-context';
@@ -55,12 +56,12 @@ export default function HomePage() {
       <AppHeader />
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="py-20 md:py-32 text-center bg-gradient-to-b from-background to-secondary/50">
-          <div className="container mx-auto px-4">
+        <section className="w-full py-20 md:py-32 text-center bg-gradient-to-b from-background to-secondary/50">
+          <div className="px-4">
             <div className="bg-primary/20 text-primary font-bold py-1 px-4 rounded-full inline-block mb-4">
                 Powered by Generative AI
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold font-headline mb-4 tracking-tight">
+            <h1 className="text-4xl md:text-6xl font-bold font-headline mb-4 tracking-tight max-w-5xl mx-auto">
                 Turn Your Spark of an Idea into a Fully-Planned Application
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8">

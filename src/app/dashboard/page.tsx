@@ -122,7 +122,7 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent className="flex-grow">
                    <p className="text-muted-foreground line-clamp-3">
-                      {project.finalSummary.split('## Goals')[0].replace('## Overview', '').trim()}
+                      {project.finalSummary.split('##')[1]?.trim()}
                    </p>
                 </CardContent>
                 <CardFooter>

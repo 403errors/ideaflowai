@@ -103,7 +103,7 @@ export default function DashboardPage() {
         <div className="flex justify-between items-center mb-8">
           <h1 className="font-headline text-4xl font-bold">Your Projects</h1>
           <Button asChild>
-            <Link href="/">
+            <Link href="/create">
               <PlusCircle className="mr-2" />
               New Project
             </Link>
@@ -146,7 +146,7 @@ export default function DashboardPage() {
             <h2 className="text-2xl font-semibold">No projects yet!</h2>
             <p className="text-muted-foreground mt-2 mb-6">Start a new project to see it here.</p>
             <Button asChild size="lg">
-              <Link href="/">
+              <Link href="/create">
                 <PlusCircle className="mr-2" />
                 Create Your First Project
               </Link>

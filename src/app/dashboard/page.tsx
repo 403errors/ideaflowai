@@ -44,6 +44,34 @@ export default function DashboardPage() {
     }
   }, [user]);
 
+  const extractSummary = (markdown: string): string => {
+    if (!markdown) {
+        return "No description available.";
+    }
+    const lines = markdown.split('\n');
+    let firstParagraph = '';
+
+    for (const line of lines) {
+        const trimmed = line.trim();
+        // Find the first line that is not a heading or list item.
+        if (trimmed && !trimmed.startsWith('#') && !trimmed.match(/^\d+\./) && !trimmed.startsWith('* ') && !trimmed.startsWith('- ')) {
+            firstParagraph = trimmed;
+            break;
+        }
+    }
+
+    // Fallback: If no prose paragraph is found, grab the first non-empty line and strip markdown.
+    if (!firstParagraph) {
+        const firstLine = lines.find(l => l.trim());
+        if (firstLine) {
+            firstParagraph = firstLine.replace(/^#+\s*/, '').replace(/^\d+\.\s*/, '').trim();
+        }
+    }
+
+    return firstParagraph || "No description available.";
+  };
+
+
   const handleDeleteClick = (project: Project) => {
     setProjectToDelete(project);
     setIsDeleteDialogOpen(true);
@@ -122,7 +150,7 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent className="flex-grow">
                    <p className="text-muted-foreground line-clamp-3">
-                      {project.finalSummary.split('##')[1]?.trim()}
+                      {extractSummary(project.finalSummary)}
                    </p>
                 </CardContent>
                 <CardFooter>

@@ -44,8 +44,8 @@ To run this project locally, follow these steps:
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/your-repo-name.git
-    cd your-repo-name
+    git clone https://github.com/your-github-username/ideaflow-ai.git
+    cd ideaflow-ai
     ```
 
 2.  **Install dependencies:**
@@ -54,16 +54,21 @@ To run this project locally, follow these steps:
     ```
 
 3.  **Set up environment variables:**
-    Create a `.env.local` file in the root of the project and add your Firebase project configuration:
+    Create a `.env.local` file in the root of the project and add your Firebase and Google AI credentials:
     ```env
+    # Firebase Credentials
     NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
     NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
     NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
     NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
     NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
     NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+
+    # Google AI (Gemini) Credentials for Genkit
+    GEMINI_API_KEY=your_gemini_api_key
     ```
-    You will also need to set up Google AI credentials for Genkit. Follow the [Genkit Google AI plugin setup guide](https://firebase.google.com/docs/genkit/plugins/google-ai#set-up-api-key) for instructions on authenticating.
+    - You can get your Firebase credentials from your project's settings in the [Firebase Console](https://console.firebase.google.com/).
+    - You can get your `GEMINI_API_KEY` from [Google AI Studio](https://aistudio.google.com/app/apikey).
 
 4.  **Run the development server:**
     The application requires two processes to run concurrently: the Next.js app and the Genkit development server.

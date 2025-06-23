@@ -194,7 +194,7 @@ export function ProjectSetupDisplay({ finalSummary }: ProjectSetupDisplayProps) 
                     ) : (
                         <LogIn className="mr-2" />
                     )}
-                    {isSaving ? 'Saving...' : (user ? 'Save Project & Continue' : 'Sign In to Save')}
+                    {isSaving ? 'Saving...' : (user ? 'Save Project & Generate Features' : 'Sign In to Save')}
                  </Button>
             </CardContent>
         </Card>

@@ -41,7 +41,9 @@ The Setup Prompt must be a complete and self-contained set of initial instructio
 - **Objectives**: The main goals the application aims to achieve.
 - **Key Features**: A comprehensive list of the core features and functionalities. This section is critical.
 - **User Flow**: A detailed description of the user's journey through the app.
-- **Recommended Tech Stack**: The technology stack chosen for the application. If none was selected, state that.
+- **Recommended Tech Stack**: The technology stack chosen for the application. **If no tech stack is mentioned in the application plan, omit this section entirely.**
+
+**Crucially, do not add a main title or heading like "# Setup Prompt" to the document.** Start directly with the "Core Idea" section.
 
 **File Structure Instructions:**
 The file structure should be represented as a markdown code block, showing the key directories and files (e.g., /src/app, /src/components, /src/lib, etc.) appropriate for the application described.

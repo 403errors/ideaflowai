@@ -9,11 +9,11 @@ import { AppHeader } from '@/components/app-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { FeatureGenerationDisplay } from '@/components/feature-generation-display';
-import { FileCode, FolderTree, FileText, Info, Copy } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { FileText, Info, Copy } from 'lucide-react';
 import { Card, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 export default function ProjectPage() {
   const { user, loading: authLoading } = useAuth();
@@ -90,70 +90,76 @@ export default function ProjectPage() {
             <Info className="w-8 h-8 text-primary flex-shrink-0 mt-1" />
             <div>
               <h2 className="font-semibold text-foreground mb-1">How to Use Your Development Brief</h2>
-              <ol className="list-decimal list-inside text-muted-foreground space-y-1">
-                <li>Start by giving your AI developer the complete <strong>Setup Prompt</strong>. This provides the core context.</li>
-                <li>Next, provide the <strong>File Structure</strong> to establish the project's architecture.</li>
-                <li>Finally, use the <strong>Feature Prompts</strong> one by one, in order, to build your application step-by-step.</li>
-              </ol>
+               <p>
+                  Your project has been organized into a sequential brief for an AI developer. Follow the steps below:
+                </p>
+                <ol className="list-decimal list-inside mt-2 space-y-1 text-muted-foreground">
+                    <li>Use the <strong>Setup Prompt</strong> to give the AI the core context of your application.</li>
+                    <li>Provide the <strong>File Structure</strong> to establish the project's architecture.</li>
+                    <li>Use the <strong>Feature Generation</strong> panel to build your app step-by-step.</li>
+                </ol>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  The <strong>Full Application Plan</strong> is collapsed at the bottom for your reference. It's a detailed, human-readable version of the entire plan.
+                </p>
             </div>
           </CardDescription>
         </Card>
         
         <div className="grid lg:grid-cols-2 gap-12">
-            <div>
-              <Tabs defaultValue="setup" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="setup"><FileCode />Setup Prompt</TabsTrigger>
-                  <TabsTrigger value="structure"><FolderTree />File Structure</TabsTrigger>
-                  <TabsTrigger value="plan"><FileText />Full Plan</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="setup" className="mt-4">
-                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold text-lg">Setup Prompt</h3>
-                    <Button variant="ghost" size="sm" onClick={() => handleCopy(project.setupPrompt, 'Setup Prompt')}>
-                      <Copy className="mr-2" /> Copy
-                    </Button>
+            <div className="space-y-8">
+              <div>
+                  <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold text-xl flex items-center gap-3"><span className="flex items-center justify-center bg-primary text-primary-foreground rounded-full h-8 w-8 text-sm font-mono">1</span>Setup Prompt</h3>
+                      <Button variant="ghost" size="sm" onClick={() => handleCopy(project.setupPrompt, 'Setup Prompt')}>
+                          <Copy className="mr-2 h-4 w-4" /> Copy
+                      </Button>
                   </div>
                   <Textarea
-                    readOnly
-                    value={project.setupPrompt}
-                    rows={20}
-                    className="font-mono text-sm bg-background/50"
+                      readOnly
+                      value={project.setupPrompt}
+                      rows={15}
+                      className="font-mono text-sm bg-background/50"
                   />
-                </TabsContent>
-
-                <TabsContent value="structure" className="mt-4">
+              </div>
+              <div>
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold text-lg">File Structure</h3>
-                    <Button variant="ghost" size="sm" onClick={() => handleCopy(project.fileStructure, 'File Structure')}>
-                      <Copy className="mr-2" /> Copy
-                    </Button>
+                      <h3 className="font-semibold text-xl flex items-center gap-3"><span className="flex items-center justify-center bg-primary text-primary-foreground rounded-full h-8 w-8 text-sm font-mono">2</span>File Structure</h3>
+                      <Button variant="ghost" size="sm" onClick={() => handleCopy(project.fileStructure, 'File Structure')}>
+                          <Copy className="mr-2 h-4 w-4" /> Copy
+                      </Button>
                   </div>
                   <Textarea
-                    readOnly
-                    value={project.fileStructure}
-                    rows={20}
-                    className="font-mono text-sm bg-background/50"
+                      readOnly
+                      value={project.fileStructure}
+                      rows={15}
+                      className="font-mono text-sm bg-background/50"
                   />
-                </TabsContent>
-
-                <TabsContent value="plan" className="mt-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold text-lg">Full Plan</h3>
-                     <Button variant="ghost" size="sm" onClick={() => handleCopy(project.finalSummary, 'Full Plan')}>
-                      <Copy className="mr-2" /> Copy
-                    </Button>
-                  </div>
-                   <Textarea
-                    readOnly
-                    value={project.finalSummary}
-                    rows={20}
-                    className="font-mono text-sm bg-background/50"
-                  />
-                </TabsContent>
-              </Tabs>
-            </div>
+              </div>
+              
+              <Accordion type="single" collapsible className="w-full pt-8 mt-8 border-t">
+                  <AccordionItem value="item-1" className="border-b-0">
+                      <AccordionTrigger className="text-base font-semibold hover:no-underline">
+                         <div className="flex items-center gap-3">
+                              <FileText className="h-5 w-5 text-primary"/>
+                              View Full Application Plan (For Reference)
+                          </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                           <div className="flex items-center justify-end">
+                              <Button variant="ghost" size="sm" onClick={() => handleCopy(project.finalSummary, 'Full Plan')}>
+                                  <Copy className="mr-2" /> Copy
+                              </Button>
+                          </div>
+                          <Textarea
+                              readOnly
+                              value={project.finalSummary}
+                              rows={20}
+                              className="font-mono text-sm bg-background/50"
+                          />
+                      </AccordionContent>
+                  </AccordionItem>
+              </Accordion>
+          </div>
             <div>
                 <FeatureGenerationDisplay setupPrompt={project.setupPrompt} fileStructure={project.fileStructure} />
             </div>

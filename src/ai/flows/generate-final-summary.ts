@@ -36,42 +36,48 @@ const prompt = ai.definePrompt({
   name: 'generateFinalSummaryPrompt',
   input: {schema: GenerateFinalSummaryInputSchema},
   output: {schema: GenerateFinalSummaryOutputSchema},
-  prompt: `You are an expert product manager and software architect. Your task is to synthesize all the information provided into a single, cohesive, and comprehensive application development plan.
+  prompt: `You are an expert product manager and software architect. Your task is to synthesize all the information provided into a single, cohesive, and comprehensive application development plan in Markdown format.
 
-The plan should be well-structured, easy to read, and formatted in Markdown. It should feel like a professional document that a development team could use to start building the application.
+**Instructions:**
+1.  **Synthesize, Don't Just List:** Weave the information together into a coherent narrative. You MUST generate sections like "Core Idea", "Key Features", and "User Flow" by synthesizing the user's idea and answers.
+2.  **Strictly Adhere to Toggles:**
+    - Only include a "User Authentication" section if \`includeAuth\` is true.
+    - Only include a "Monetization" section if \`includeMonetization\` is true.
+    - Only include a "Technology Recommendations" section if the \`techStack\` array is not empty.
+    - If any of these are not provided, **you must omit their sections entirely.** Do not mention that they were excluded.
+3.  **No Roadmaps or Timelines:** **Crucially, do not add a "Development Roadmap," "Timeline," or any other project management sections.** The output should be a plan, not a schedule.
+4.  **Start with Content:** The generated markdown document must start directly with the first heading (e.g., \`## Core Idea\`). Do not add a main title like "# Application Development Plan".
 
-Here is the information you need to synthesize:
+Here is the information you must synthesize:
 
 ---
-### 1. Initial Idea
-This is the core concept extracted from the user's initial input.
+### Source Information
+
+**1. Initial Idea Summary & User Refinements (Q&A):**
 {{{ideaSummary}}}
----
-### 2. User Refinements
-These are the decisions the user made to clarify the app's features, UI/UX, and flow.
 
 {{#each answers}}
-- **{{@key}}**
-  - {{this}}
+- **Question: {{@key}}**
+  - Answer: {{this}}
 {{/each}}
-{{#if includeAuth}}
-- **User Authentication**: The user has chosen to include a user authentication system for account management.
-{{/if}}
-{{#if includeMonetization}}
-- **Monetization**: The user has chosen to include a monetization strategy.
-{{/if}}
----
-{{#if techStack}}
-### 3. Technology Recommendations
-These are the suggested tech stacks for a web application.
 
+{{#if includeAuth}}
+**2. User Authentication:** The user has chosen to include a user authentication system.
+{{/if}}
+
+{{#if includeMonetization}}
+**3. Monetization:** The user has chosen to include a monetization strategy.
+{{/if}}
+
+{{#if techStack}}
+**4. Technology Recommendations:**
 {{#each techStack}}
 - {{this}}
 {{/each}}
----
 {{/if}}
+---
 
-Now, generate the final "Application Development Plan" as a single markdown document. Do not just list the information above. Instead, weave it together into a coherent narrative. Start with a high-level executive summary, then detail the application's features, user experience, and technical considerations. If authentication or monetization are included, make sure to describe them in their own sections within the plan. Be professional and encouraging. The final output should be only the markdown document.
+Now, generate the final application plan based **only** on the information provided above, following all instructions.
 `,
 });
 

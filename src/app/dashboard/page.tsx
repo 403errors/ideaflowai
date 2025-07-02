@@ -51,32 +51,33 @@ export default function DashboardPage() {
     const lines = markdown.split('\n');
     
     // Try to find content under a specific heading first.
-    const headingsToSearch = ['## Overview', '## Core Idea', '# Overview', '# Core Idea'];
+    const headingsToSearch = ['## overview', '## core idea', '# overview', '# core idea'];
     let startIndex = -1;
 
     for (const heading of headingsToSearch) {
-      const index = lines.findIndex(line => line.trim().startsWith(heading));
+      const index = lines.findIndex(line => line.trim().toLowerCase().startsWith(heading));
       if (index !== -1) {
-        startIndex = index + 1;
+        startIndex = index + 1; // Start from the line after the heading
         break;
       }
     }
     
-    // If a heading was found, search from that point. Otherwise, search from the beginning.
     const linesToProcess = startIndex !== -1 ? lines.slice(startIndex) : lines;
 
-    // Find the first line of actual text (prose).
+    // Find the first line of actual text that is not a list item or another heading
     for (const line of linesToProcess) {
         const trimmed = line.trim();
-        if (trimmed && !trimmed.startsWith('#') && !trimmed.match(/^\d+\./) && !trimmed.startsWith('* ') && !trimmed.startsWith('- ')) {
+        // A good summary line is not a heading, not a list item, and has some length.
+        if (trimmed && !trimmed.startsWith('#') && !trimmed.match(/^(\*|-|\d+\.)\s/)) {
             return trimmed;
         }
     }
     
-    // If we still found nothing (e.g., after a heading there was just another heading), fall back to the original search from top
-     for (const line of lines) {
+    // Fallback if no specific summary line was found under the main headings.
+    // Find the first non-heading, non-list item line anywhere in the document.
+    for (const line of lines) {
         const trimmed = line.trim();
-        if (trimmed && !trimmed.startsWith('#') && !trimmed.match(/^\d+\./) && !trimmed.startsWith('* ') && !trimmed.startsWith('- ')) {
+        if (trimmed && !trimmed.startsWith('#') && !trimmed.match(/^(\*|-|\d+\.)\s/)) {
             return trimmed;
         }
     }

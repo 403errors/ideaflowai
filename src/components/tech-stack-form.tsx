@@ -8,6 +8,9 @@ import { ChevronRight, Layers, Loader2 } from "lucide-react";
 import { useState, useEffect, type FormEvent, useCallback } from "react";
 import { Switch } from "./ui/switch";
 import { Label } from "./ui/label";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { cn } from "@/lib/utils";
+import { Skeleton } from "./ui/skeleton";
 
 interface TechStackFormProps {
   onComplete: (techStack: string[]) => void;
@@ -16,6 +19,7 @@ interface TechStackFormProps {
 export function TechStackForm({ onComplete }: TechStackFormProps) {
   const [includeTechStack, setIncludeTechStack] = useState(true);
   const [techStacks, setTechStacks] = useState<string[]>([]);
+  const [selectedStack, setSelectedStack] = useState<string>('');
   const [isFetching, setIsFetching] = useState(false);
   const { toast } = useToast();
 
@@ -24,6 +28,9 @@ export function TechStackForm({ onComplete }: TechStackFormProps) {
       try {
           const result = await recommendTechStack({ applicationType: "web" });
           setTechStacks(result.techStacks);
+          if (result.techStacks.length > 0) {
+              setSelectedStack(result.techStacks[0]);
+          }
       } catch (error) {
           console.error(error);
           toast({
@@ -39,12 +46,19 @@ export function TechStackForm({ onComplete }: TechStackFormProps) {
   useEffect(() => {
     if (includeTechStack) {
       fetchTechStack();
+    } else {
+      setTechStacks([]);
+      setSelectedStack('');
     }
   }, [includeTechStack, fetchTechStack]);
   
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    onComplete(includeTechStack ? techStacks : []);
+    if (includeTechStack) {
+      onComplete(selectedStack ? [selectedStack] : []);
+    } else {
+      onComplete([]);
+    }
   };
 
   return (
@@ -71,20 +85,31 @@ export function TechStackForm({ onComplete }: TechStackFormProps) {
             
             {includeTechStack && (
                 <div className="space-y-4 animate-in fade-in-50">
-                    <h3 className="font-semibold text-lg">Top 3 Recommended Stacks:</h3>
+                    <h3 className="font-semibold text-lg">Select a Recommended Stack:</h3>
                     {isFetching ? (
-                        <div className="flex items-center justify-center p-10 border rounded-md">
-                           <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <div className="grid gap-4 md:grid-cols-3">
+                            <Skeleton className="h-24 w-full" />
+                            <Skeleton className="h-24 w-full" />
+                            <Skeleton className="h-24 w-full" />
                         </div>
                     ) : (
-                        <div className="grid gap-4 md:grid-cols-3">
-                            {techStacks.map((stack, index) => (
-                                <div key={index} className="p-4 border rounded-md bg-secondary/50 flex flex-col items-center text-center">
-                                    <Layers className="w-8 h-8 mb-2 text-primary"/>
-                                    <p className="font-bold text-xl">{stack}</p>
+                        <RadioGroup value={selectedStack} onValueChange={setSelectedStack} className="grid gap-4 md:grid-cols-3">
+                             {techStacks.map((stack, index) => (
+                                <div key={index}>
+                                    <RadioGroupItem value={stack} id={`stack-${index}`} className="peer sr-only" />
+                                    <Label 
+                                        htmlFor={`stack-${index}`} 
+                                        className={cn(
+                                            "flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer",
+                                            "peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                                        )}
+                                    >
+                                        <Layers className="mb-3 h-6 w-6" />
+                                        {stack}
+                                    </Label>
                                 </div>
                             ))}
-                        </div>
+                        </RadioGroup>
                     )}
                 </div>
             )}

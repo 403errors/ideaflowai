@@ -42,7 +42,7 @@ const prompt = ai.definePrompt({
 1.  **Synthesize, Don't Just List:** Weave the information together into a coherent narrative. You MUST generate sections like "Core Idea", "Key Features", and "User Flow" by synthesizing the user's idea and answers.
 2.  **Strictly Adhere to Toggles:**
     - Only include a "User Authentication" section if \`includeAuth\` is true.
-    - Only include a "Monetization" section if \`includeMonetization\` is true.
+    - Crucially, if \`includeMonetization\` is false, you MUST NOT suggest or detail any monetization features in any section (including Key Features), even if they were mentioned in the initial idea. The user has explicitly disabled this option. If it is true, you should include a "Monetization" section.
     - Only include a "Technology Recommendations" section if the \`techStack\` array is not empty.
     - If any of these are not provided, **you must omit their sections entirely.** Do not mention that they were excluded.
 3.  **No Roadmaps or Timelines:** **Crucially, do not add a "Development Roadmap," "Timeline," or any other project management sections.** The output should be a plan, not a schedule.

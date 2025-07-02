@@ -1,3 +1,8 @@
+export interface Feature {
+  title: string;
+  description: string;
+}
+
 export interface Project {
   id: string;
   userId: string;
@@ -7,6 +12,7 @@ export interface Project {
   setupPrompt: string;
   fileStructure: string;
   createdAt: string;
+  features?: Feature[];
 }
 
 export interface AppUser {

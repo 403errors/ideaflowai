@@ -3,17 +3,19 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
-import { getProject } from '@/lib/actions';
-import type { Project } from '@/types';
+import { getProject, updateProjectFeatures } from '@/lib/actions';
+import { extractFeatures } from '@/ai/flows/extract-features';
+import type { Project, Feature } from '@/types';
 import { AppHeader } from '@/components/app-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { FeatureGenerationDisplay } from '@/components/feature-generation-display';
-import { FileText, Info, Copy, FileInput } from 'lucide-react';
-import { Card, CardDescription } from '@/components/ui/card';
+import { FileText, Info, Copy, FileInput, RefreshCcw, Loader2 } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 export default function ProjectPage() {
   const { user, loading: authLoading } = useAuth();
@@ -22,7 +24,10 @@ export default function ProjectPage() {
   const projectId = params.id as string;
 
   const [project, setProject] = useState<Project | null>(null);
+  const [features, setFeatures] = useState<Feature[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isReinitializing, setIsReinitializing] = useState(false);
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -38,8 +43,8 @@ export default function ProjectPage() {
         const fetchedProject = await getProject(projectId, user.uid);
         if (fetchedProject) {
           setProject(fetchedProject);
+          setFeatures(fetchedProject.features || []);
         } else {
-          // Handle project not found or access denied
           router.push('/dashboard');
         }
         setLoading(false);
@@ -47,6 +52,25 @@ export default function ProjectPage() {
       fetchProject();
     }
   }, [user, projectId, router]);
+  
+  const handleReinitialize = async () => {
+    if (!project || !user) return;
+    
+    setIsReinitializing(true);
+    setIsAlertOpen(false);
+    
+    try {
+        const { features: newFeatures } = await extractFeatures({ setupPrompt: project.setupPrompt });
+        await updateProjectFeatures(project.id, user.uid, newFeatures);
+        setFeatures(newFeatures);
+        toast({ title: 'Features Re-initialized!', description: 'The feature list has been updated.' });
+    } catch (error) {
+        console.error("Error re-initializing features:", error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Failed to re-initialize features.' });
+    } finally {
+        setIsReinitializing(false);
+    }
+  };
 
   const handleCopy = (content: string, type: string) => {
     navigator.clipboard.writeText(content);
@@ -77,7 +101,7 @@ export default function ProjectPage() {
   }
 
   if (!project) {
-    return null; // or a not found component
+    return null;
   }
 
   return (
@@ -97,29 +121,47 @@ export default function ProjectPage() {
                     <li>Use the <strong>Setup Prompt</strong> to give the AI the core context of your application.</li>
                     <li>Use the <strong>Feature Generation</strong> panel to build your app step-by-step.</li>
                 </ol>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  The original inputs and full application plan are collapsed at the bottom for your reference.
-                </p>
             </div>
           </CardDescription>
         </Card>
         
         <div className="grid lg:grid-cols-2 gap-12">
             <div className="space-y-8">
-              <div>
-                  <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold text-xl flex items-center gap-3"><span className="flex items-center justify-center bg-primary text-primary-foreground rounded-full h-8 w-8 text-sm font-mono">1</span>Setup Prompt</h3>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle className="flex items-center gap-3"><span className="flex items-center justify-center bg-primary text-primary-foreground rounded-full h-8 w-8 text-sm font-mono">1</span>Setup Prompt</CardTitle>
                       <Button variant="ghost" size="sm" onClick={() => handleCopy(project.setupPrompt, 'Setup Prompt')}>
                           <Copy className="mr-2 h-4 w-4" /> Copy
                       </Button>
-                  </div>
+                </CardHeader>
+                <CardContent>
                   <Textarea
                       readOnly
                       value={project.setupPrompt}
                       rows={15}
                       className="font-mono text-sm bg-background/50"
                   />
-              </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                    <CardTitle className="text-xl">Advanced Options</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Button variant="outline" onClick={() => setIsAlertOpen(true)} disabled={isReinitializing}>
+                        {isReinitializing ? (
+                            <Loader2 className="mr-2 animate-spin" />
+                        ) : (
+                            <RefreshCcw className="mr-2" />
+                        )}
+                        {isReinitializing ? "Processing..." : "Re-initialize Features"}
+                    </Button>
+                    <p className="text-sm text-muted-foreground mt-2">
+                        If you've edited your Setup Prompt, you can regenerate the feature list. This action is permanent.
+                    </p>
+                </CardContent>
+              </Card>
               
               <Accordion type="single" collapsible className="w-full pt-8 mt-8 border-t">
                   <AccordionItem value="original-idea">
@@ -167,11 +209,29 @@ export default function ProjectPage() {
               </Accordion>
           </div>
             <div>
-                <h3 className="font-semibold text-xl flex items-center gap-3 mb-2"><span className="flex items-center justify-center bg-primary text-primary-foreground rounded-full h-8 w-8 text-sm font-mono">2</span>Feature Prompts</h3>
-                <FeatureGenerationDisplay setupPrompt={project.setupPrompt} fileStructure={project.fileStructure} />
+                 <div className="flex items-center gap-3 mb-2">
+                    <span className="flex items-center justify-center bg-primary text-primary-foreground rounded-full h-8 w-8 text-sm font-mono">2</span>
+                    <h3 className="font-semibold text-xl">Feature Prompts</h3>
+                </div>
+                <FeatureGenerationDisplay setupPrompt={project.setupPrompt} fileStructure={project.fileStructure} features={features} />
             </div>
         </div>
       </main>
+
+      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will re-analyze your setup prompt and generate a new list of features. Any existing generated feature prompts will be hidden. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleReinitialize}>Continue</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

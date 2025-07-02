@@ -1,7 +1,7 @@
 
-import { collection, addDoc, getDocs, query, where, doc, getDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, doc, getDoc, serverTimestamp, deleteDoc, updateDoc } from 'firebase/firestore';
 import { db } from './firebase';
-import type { Project } from '@/types';
+import type { Project, Feature } from '@/types';
 
 interface ProjectData {
   userId: string;
@@ -10,6 +10,7 @@ interface ProjectData {
   finalSummary: string;
   setupPrompt: string;
   fileStructure: string;
+  features: Feature[];
 }
 
 export async function saveProject(projectData: ProjectData): Promise<string> {
@@ -41,6 +42,7 @@ export async function getProjects(userId: string): Promise<Project[]> {
         setupPrompt: data.setupPrompt,
         fileStructure: data.fileStructure,
         createdAt: data.createdAt.toDate().toISOString(),
+        features: data.features || [],
     }
   });
 
@@ -64,6 +66,7 @@ export async function getProject(projectId: string, userId: string): Promise<Pro
                 setupPrompt: projectData.setupPrompt,
                 fileStructure: projectData.fileStructure,
                 createdAt: projectData.createdAt.toDate().toISOString(),
+                features: projectData.features || [],
             } as Project;
         }
     }
@@ -84,4 +87,20 @@ export async function deleteProject(projectId: string, userId: string): Promise<
     console.error('Error deleting document: ', e);
     throw new Error('Could not delete project.');
   }
+}
+
+export async function updateProjectFeatures(projectId: string, userId: string, features: Feature[]): Promise<void> {
+    const projectRef = doc(db, 'projects', projectId);
+    const projectSnap = await getDoc(projectRef);
+
+    if (!projectSnap.exists() || projectSnap.data().userId !== userId) {
+        throw new Error("Project not found or you don't have permission to update it.");
+    }
+    
+    try {
+        await updateDoc(projectRef, { features });
+    } catch (e) {
+        console.error('Error updating document: ', e);
+        throw new Error('Could not update project features.');
+    }
 }

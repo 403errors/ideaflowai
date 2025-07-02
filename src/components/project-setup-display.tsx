@@ -1,6 +1,7 @@
 "use client";
 
 import { generateProjectSetup } from "@/ai/flows/generate-project-setup";
+import { extractFeatures } from "@/ai/flows/extract-features";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -67,6 +68,8 @@ export function ProjectSetupDisplay({ finalSummary, originalIdea, projectName }:
 
         setIsSaving(true);
         try {
+            const { features } = await extractFeatures({ setupPrompt: setupPromptContent });
+
             const newProjectId = await saveProject({
                 userId: user.uid,
                 name: projectName,
@@ -74,6 +77,7 @@ export function ProjectSetupDisplay({ finalSummary, originalIdea, projectName }:
                 finalSummary,
                 setupPrompt: setupPromptContent,
                 fileStructure,
+                features,
             });
             toast({
                 title: 'Project Saved!',

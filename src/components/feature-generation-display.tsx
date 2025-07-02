@@ -1,53 +1,25 @@
 "use client";
 
-import { extractFeatures } from "@/ai/flows/extract-features";
 import { generateFeaturePrompt } from "@/ai/flows/generate-feature-prompt";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { WandSparkles, FileCode, Loader2, Copy, Bot } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Textarea } from "./ui/textarea";
+import type { Feature } from "@/types";
 
 interface FeatureGenerationDisplayProps {
   setupPrompt: string;
   fileStructure: string;
+  features: Feature[];
 }
 
-interface Feature {
-  title: string;
-  description: string;
-}
-
-export function FeatureGenerationDisplay({ setupPrompt, fileStructure }: FeatureGenerationDisplayProps) {
-  const [features, setFeatures] = useState<Feature[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export function FeatureGenerationDisplay({ setupPrompt, fileStructure, features }: FeatureGenerationDisplayProps) {
   const [generatedPrompts, setGeneratedPrompts] = useState<Record<string, string>>({});
   const [generatingFor, setGeneratingFor] = useState<string | null>(null);
   const { toast } = useToast();
-
-  useEffect(() => {
-    const getFeatures = async () => {
-      if (!setupPrompt) return;
-      setIsLoading(true);
-      try {
-        const result = await extractFeatures({ setupPrompt });
-        setFeatures(result.features);
-      } catch (error) {
-        console.error("Error extracting features:", error);
-        toast({
-          variant: "destructive",
-          title: "AI Error",
-          description: "Could not extract features from the setup prompt.",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    getFeatures();
-  }, [setupPrompt, toast]);
 
   const handleGeneratePrompt = async (feature: Feature) => {
     if (generatingFor) return;
@@ -83,35 +55,16 @@ export function FeatureGenerationDisplay({ setupPrompt, fileStructure }: Feature
     });
   };
 
-  if (isLoading) {
-    return (
-      <Card className="w-full">
-        <CardHeader>
-          <Skeleton className="h-8 w-1/2 mb-2" />
-          <Skeleton className="h-4 w-3/4" />
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <Skeleton key={i} className="h-14 w-full" />
-          ))}
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card className="w-full animate-in fade-in-50">
       <CardHeader>
-        <div className="flex justify-center mb-4">
-          <WandSparkles className="w-16 h-16 text-primary" />
-        </div>
-        <CardTitle className="font-headline text-3xl text-center">Generate Your Prompts</CardTitle>
+        <CardTitle className="font-headline text-xl text-center">Generate Your Prompts</CardTitle>
         <CardDescription className="text-center">
           Here are the features from your plan. Generate a detailed, sequential prompt for each one.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <Accordion type="single" collapsible className="w-full" defaultValue="item-0">
+        <Accordion type="single" collapsible className="w-full" defaultValue={features.length > 0 ? "item-0" : undefined}>
           {features.map((feature, index) => (
             <AccordionItem value={`item-${index}`} key={index}>
               <AccordionTrigger className="text-lg font-semibold hover:no-underline">
@@ -155,6 +108,12 @@ export function FeatureGenerationDisplay({ setupPrompt, fileStructure }: Feature
             </AccordionItem>
           ))}
         </Accordion>
+         {features.length === 0 && (
+            <div className="text-center text-muted-foreground py-10">
+                <p>No features were extracted from your plan.</p>
+                <p className="text-sm">You can edit your Setup Prompt and re-initialize features.</p>
+            </div>
+        )}
       </CardContent>
     </Card>
   );

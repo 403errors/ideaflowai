@@ -49,26 +49,39 @@ export default function DashboardPage() {
         return "No description available.";
     }
     const lines = markdown.split('\n');
-    let firstParagraph = '';
+    
+    // Try to find content under a specific heading first.
+    const headingsToSearch = ['## Overview', '## Core Idea', '# Overview', '# Core Idea'];
+    let startIndex = -1;
 
-    for (const line of lines) {
+    for (const heading of headingsToSearch) {
+      const index = lines.findIndex(line => line.trim().startsWith(heading));
+      if (index !== -1) {
+        startIndex = index + 1;
+        break;
+      }
+    }
+    
+    // If a heading was found, search from that point. Otherwise, search from the beginning.
+    const linesToProcess = startIndex !== -1 ? lines.slice(startIndex) : lines;
+
+    // Find the first line of actual text (prose).
+    for (const line of linesToProcess) {
         const trimmed = line.trim();
-        // Find the first line that is not a heading or list item.
         if (trimmed && !trimmed.startsWith('#') && !trimmed.match(/^\d+\./) && !trimmed.startsWith('* ') && !trimmed.startsWith('- ')) {
-            firstParagraph = trimmed;
-            break;
+            return trimmed;
         }
     }
-
-    // Fallback: If no prose paragraph is found, grab the first non-empty line and strip markdown.
-    if (!firstParagraph) {
-        const firstLine = lines.find(l => l.trim());
-        if (firstLine) {
-            firstParagraph = firstLine.replace(/^#+\s*/, '').replace(/^\d+\.\s*/, '').trim();
+    
+    // If we still found nothing (e.g., after a heading there was just another heading), fall back to the original search from top
+     for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed && !trimmed.startsWith('#') && !trimmed.match(/^\d+\./) && !trimmed.startsWith('* ') && !trimmed.startsWith('- ')) {
+            return trimmed;
         }
     }
-
-    return firstParagraph || "No description available.";
+    
+    return "No description available.";
   };
 
 

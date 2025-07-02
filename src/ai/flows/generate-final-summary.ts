@@ -61,17 +61,15 @@ These are the decisions the user made to clarify the app's features, UI/UX, and 
 - **Monetization**: The user has chosen to include a monetization strategy.
 {{/if}}
 ---
+{{#if techStack}}
 ### 3. Technology Recommendations
 These are the suggested tech stacks for a web application.
 
-{{#if techStack}}
 {{#each techStack}}
 - {{this}}
 {{/each}}
-{{else}}
-- No specific tech stack was selected.
-{{/if}}
 ---
+{{/if}}
 
 Now, generate the final "Application Development Plan" as a single markdown document. Do not just list the information above. Instead, weave it together into a coherent narrative. Start with a high-level executive summary, then detail the application's features, user experience, and technical considerations. If authentication or monetization are included, make sure to describe them in their own sections within the plan. Be professional and encouraging. The final output should be only the markdown document.
 `,

@@ -32,19 +32,17 @@ const prompt = ai.definePrompt({
   output: {schema: GenerateProjectSetupOutputSchema},
   prompt: `You are a senior software engineer tasked with creating a comprehensive "Setup Prompt" for an AI developer. This document is the foundational blueprint and MUST contain all necessary information to begin the project.
 
-Based on the final application plan for a project named '{{{projectName}}}' provided below, generate two things:
+Based on the final application plan provided below for a project named '{{{projectName}}}', generate two things:
 1.  A "Setup Prompt" document.
 2.  A recommended file structure for a Next.js project.
 
 **Setup Prompt Instructions:**
-The Setup Prompt must be a complete and self-contained set of initial instructions. It must strictly adhere to the information from the user's plan and include the following sections ONLY:
-- **Core Idea**: A brief summary of the application.
-- **Objectives**: The main goals the application aims to achieve.
-- **Key Features**: A comprehensive list of the core features and functionalities. This section is critical.
-- **User Flow**: A detailed description of the user's journey through the app.
-- **Recommended Tech Stack**: The technology stack chosen for the application. **If no tech stack is mentioned in the application plan, omit this section entirely.**
-
-**Crucially, do not add a main title or heading like "# Setup Prompt" to the document.** Start directly with the "Core Idea" section.
+- The Setup Prompt must be a complete and self-contained set of initial instructions.
+- It must strictly adhere to the information from the user's plan.
+- The prompt MUST naturally incorporate the project's name, '{{{projectName}}}', where appropriate (e.g., in the Core Idea section).
+- It should include the following sections: "Core Idea", "Objectives", "Key Features", and "User Flow".
+- **IMPORTANT**: Only include a "Recommended Tech Stack" section IF it is explicitly detailed in the provided Application Plan. If the plan does not mention a tech stack, you MUST OMIT this section entirely from your output.
+- **Crucially, do not add a main title or heading like "# Setup Prompt" to the document.** Start directly with the "Core Idea" section.
 
 **File Structure Instructions:**
 The file structure should be represented as a markdown code block, showing the key directories and files (e.g., /src/app, /src/components, /src/lib, etc.) appropriate for the application described.

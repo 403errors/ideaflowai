@@ -17,9 +17,10 @@ import { Input } from "./ui/input";
 
 interface ProjectSetupDisplayProps {
   finalSummary: string;
+  originalIdea: string;
 }
 
-export function ProjectSetupDisplay({ finalSummary }: ProjectSetupDisplayProps) {
+export function ProjectSetupDisplay({ finalSummary, originalIdea }: ProjectSetupDisplayProps) {
     const [projectName, setProjectName] = useState('');
     const [setupPromptContent, setSetupPromptContent] = useState('');
     const [fileStructure, setFileStructure] = useState('');
@@ -84,6 +85,7 @@ export function ProjectSetupDisplay({ finalSummary }: ProjectSetupDisplayProps) 
             const newProjectId = await saveProject({
                 userId: user.uid,
                 name: projectName,
+                originalIdea,
                 finalSummary,
                 setupPrompt: setupPromptContent,
                 fileStructure,

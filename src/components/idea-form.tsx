@@ -12,7 +12,7 @@ import { Loader2, Paperclip, Send } from "lucide-react";
 import { useState, type ChangeEvent, type FormEvent, useCallback } from "react";
 
 interface IdeaFormProps {
-  onIdeaExtracted: (summary: string) => void;
+  onIdeaExtracted: (summary: string, originalIdea: string) => void;
 }
 
 const fileToDataURL = (file: File): Promise<string> => {
@@ -26,6 +26,7 @@ const fileToDataURL = (file: File): Promise<string> => {
 
 export function IdeaForm({ onIdeaExtracted }: IdeaFormProps) {
   const [ideaText, setIdeaText] = useState("");
+  const [originalIdea, setOriginalIdea] = useState("");
   const [fileName, setFileName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [loadingReason, setLoadingReason] = useState("");
@@ -36,6 +37,7 @@ export function IdeaForm({ onIdeaExtracted }: IdeaFormProps) {
     if (file) {
       setLoadingReason("Extracting ideas from your file...");
       setIsLoading(true);
+      setOriginalIdea(`Input from file: ${file.name}`);
       try {
         const dataUrl = await fileToDataURL(file);
         const result = await extractIdea({ input: dataUrl });
@@ -52,6 +54,7 @@ export function IdeaForm({ onIdeaExtracted }: IdeaFormProps) {
           description: "Could not process the uploaded file.",
         });
         setFileName("");
+        setOriginalIdea("");
       } finally {
         setIsLoading(false);
       }
@@ -71,18 +74,18 @@ export function IdeaForm({ onIdeaExtracted }: IdeaFormProps) {
 
     setIsLoading(true);
     
-    // If a file was uploaded, fileName will be set.
-    // In that case, ideaText already contains the markdown summary.
     if (fileName) {
+      // If a file was uploaded, the idea is already extracted.
       setLoadingReason("Finalizing your plan...");
-      onIdeaExtracted(ideaText);
+      onIdeaExtracted(ideaText, originalIdea);
     } else {
       // If no file, ideaText contains raw text, so we need to extract.
       setLoadingReason("Extracting the core concepts from your idea...");
       try {
         const result = await extractIdea({ input: ideaText });
-        onIdeaExtracted(result.markdownOutput);
-      } catch (error) {
+        onIdeaExtracted(result.markdownOutput, ideaText);
+      } catch (error)
+      {
         console.error(error);
         toast({
           variant: "destructive",
@@ -92,9 +95,15 @@ export function IdeaForm({ onIdeaExtracted }: IdeaFormProps) {
         setIsLoading(false);
       }
     }
-    // Don't setIsLoading(false) here, as the component will unmount on success
-  }, [ideaText, fileName, onIdeaExtracted, toast]);
+  }, [ideaText, originalIdea, fileName, onIdeaExtracted, toast]);
   
+  const handleTextChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setIdeaText(e.target.value);
+    // When user types, they are creating a new original idea
+    if (fileName) setFileName("");
+    setOriginalIdea(e.target.value);
+  }
+
   if (isLoading) {
     return (
       <Card className="w-full">
@@ -132,11 +141,7 @@ export function IdeaForm({ onIdeaExtracted }: IdeaFormProps) {
               id="idea-text"
               placeholder="e.g., A mobile app that helps users find the best coffee shops nearby..."
               value={ideaText}
-              onChange={(e) => {
-                setIdeaText(e.target.value);
-                // When user types, they are overriding the file.
-                setFileName("");
-              }}
+              onChange={handleTextChange}
               rows={12}
             />
           </div>
@@ -154,7 +159,6 @@ export function IdeaForm({ onIdeaExtracted }: IdeaFormProps) {
                 accept="image/*,application/pdf"
                 onChange={handleFileChange}
                 className="hidden"
-                // Reset file input so user can upload the same file again
                 key={fileName || 'file-input'}
               />
               <Button asChild variant="outline" type="button" className="w-full">

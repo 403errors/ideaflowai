@@ -6,6 +6,7 @@ import type { Project } from '@/types';
 interface ProjectData {
   userId: string;
   name: string;
+  originalIdea: string;
   finalSummary: string;
   setupPrompt: string;
   fileStructure: string;
@@ -35,6 +36,7 @@ export async function getProjects(userId: string): Promise<Project[]> {
         id: doc.id,
         userId: data.userId,
         name: data.name,
+        originalIdea: data.originalIdea || '',
         finalSummary: data.finalSummary,
         setupPrompt: data.setupPrompt,
         fileStructure: data.fileStructure,
@@ -57,6 +59,7 @@ export async function getProject(projectId: string, userId: string): Promise<Pro
                 id: docSnap.id,
                 userId: projectData.userId,
                 name: projectData.name,
+                originalIdea: projectData.originalIdea,
                 finalSummary: projectData.finalSummary,
                 setupPrompt: projectData.setupPrompt,
                 fileStructure: projectData.fileStructure,

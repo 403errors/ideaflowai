@@ -66,7 +66,7 @@ None
 
 **Your Goal for the '{{{category}}}' category:**
 - **For 'UI/UX':** Generate questions about the overall aesthetic (e.g., modern, minimalist, playful), branding, user feedback mechanisms (e.g., ratings, contact forms), accessibility considerations, and the desired emotional response from users.
-- **For 'Features':** Generate questions about core functionalities, "nice-to-have" features, potential monetization strategies (e.g., ads, subscriptions, one-time purchase), data handling/privacy, and user account management.
+- **For 'Features':** Generate questions about core functionalities, "nice-to-have" features, and data handling/privacy. **Do not ask about monetization or user authentication.**
 - **For 'Flow & Extras':** Generate questions that map out the user journey from start to finish. This includes onboarding, primary user actions, and potential integrations like social media sharing, push notifications, or third-party services.
 
 **Important Rules:**

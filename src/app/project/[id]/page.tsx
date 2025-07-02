@@ -9,7 +9,7 @@ import { AppHeader } from '@/components/app-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { FeatureGenerationDisplay } from '@/components/feature-generation-display';
-import { FileText, Info, Copy } from 'lucide-react';
+import { FileText, Info, Copy, FileInput } from 'lucide-react';
 import { Card, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -99,7 +99,7 @@ export default function ProjectPage() {
                     <li>Use the <strong>Feature Generation</strong> panel to build your app step-by-step.</li>
                 </ol>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  The <strong>Full Application Plan</strong> is collapsed at the bottom for your reference. It's a detailed, human-readable version of the entire plan.
+                  The original inputs and full application plan are collapsed at the bottom for your reference.
                 </p>
             </div>
           </CardDescription>
@@ -137,11 +137,32 @@ export default function ProjectPage() {
               </div>
               
               <Accordion type="single" collapsible className="w-full pt-8 mt-8 border-t">
-                  <AccordionItem value="item-1" className="border-b-0">
+                  <AccordionItem value="original-idea">
+                      <AccordionTrigger className="text-base font-semibold hover:no-underline">
+                         <div className="flex items-center gap-3">
+                              <FileInput className="h-5 w-5 text-primary"/>
+                              View Original Idea Input
+                          </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                           <div className="flex items-center justify-end">
+                              <Button variant="ghost" size="sm" onClick={() => handleCopy(project.originalIdea, 'Original Idea')}>
+                                  <Copy className="mr-2" /> Copy
+                              </Button>
+                          </div>
+                          <Textarea
+                              readOnly
+                              value={project.originalIdea}
+                              rows={10}
+                              className="font-mono text-sm bg-background/50"
+                          />
+                      </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="full-plan" className="border-b-0">
                       <AccordionTrigger className="text-base font-semibold hover:no-underline">
                          <div className="flex items-center gap-3">
                               <FileText className="h-5 w-5 text-primary"/>
-                              View Full Application Plan (For Reference)
+                              View Full Application Plan
                           </div>
                       </AccordionTrigger>
                       <AccordionContent>
@@ -161,6 +182,7 @@ export default function ProjectPage() {
               </Accordion>
           </div>
             <div>
+                <h3 className="font-semibold text-xl flex items-center gap-3 mb-2"><span className="flex items-center justify-center bg-primary text-primary-foreground rounded-full h-8 w-8 text-sm font-mono">3</span>Feature Prompts</h3>
                 <FeatureGenerationDisplay setupPrompt={project.setupPrompt} fileStructure={project.fileStructure} />
             </div>
         </div>

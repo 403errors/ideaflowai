@@ -16,6 +16,8 @@ const GenerateFinalSummaryInputSchema = z.object({
     .record(z.string(), z.string())
     .describe('A map of questions and answers from the user refinement process.'),
   techStack: z.array(z.string()).describe('A list of recommended technology stacks.'),
+  includeAuth: z.boolean().optional().describe('Whether to include user authentication.'),
+  includeMonetization: z.boolean().optional().describe('Whether to include monetization.'),
 });
 export type GenerateFinalSummaryInput = z.infer<typeof GenerateFinalSummaryInputSchema>;
 
@@ -52,6 +54,12 @@ These are the decisions the user made to clarify the app's features, UI/UX, and 
 - **{{@key}}**
   - {{this}}
 {{/each}}
+{{#if includeAuth}}
+- **User Authentication**: The user has chosen to include a user authentication system for account management.
+{{/if}}
+{{#if includeMonetization}}
+- **Monetization**: The user has chosen to include a monetization strategy.
+{{/if}}
 ---
 ### 3. Technology Recommendations
 These are the suggested tech stacks for a web application.
@@ -65,7 +73,7 @@ These are the suggested tech stacks for a web application.
 {{/if}}
 ---
 
-Now, generate the final "Application Development Plan" as a single markdown document. Do not just list the information above. Instead, weave it together into a coherent narrative. Start with a high-level executive summary, then detail the application's features, user experience, and technical considerations. Be professional and encouraging. The final output should be only the markdown document.
+Now, generate the final "Application Development Plan" as a single markdown document. Do not just list the information above. Instead, weave it together into a coherent narrative. Start with a high-level executive summary, then detail the application's features, user experience, and technical considerations. If authentication or monetization are included, make sure to describe them in their own sections within the plan. Be professional and encouraging. The final output should be only the markdown document.
 `,
 });
 

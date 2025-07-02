@@ -9,31 +9,36 @@ import { TechStackForm } from "@/components/tech-stack-form";
 import { Progress } from "@/components/ui/progress";
 import { ProjectSetupDisplay } from "@/components/project-setup-display";
 import { useRouter } from "next/navigation";
+import { AddonsForm } from "@/components/addons-form";
 
-type Step = "idea" | "ui_ux" | "features" | "flow_extras" | "tech_stack" | "summary" | "setup";
+type Step = "idea" | "ui_ux" | "features" | "flow_extras" | "addons" | "tech_stack" | "summary" | "setup";
 type McqAnswers = Record<string, string>;
+type AddonChoices = { auth: boolean; monetization: boolean };
 
 const EMPTY_ANSWERS = {};
 
 export default function CreatePage() {
   const [step, setStep] = useState<Step>("idea");
   
+  const [originalIdea, setOriginalIdea] = useState("");
   const [ideaSummary, setIdeaSummary] = useState("");
   const [uiUxAnswers, setUiUxAnswers] = useState<McqAnswers>({});
   const [featureAnswers, setFeatureAnswers] = useState<McqAnswers>({});
   const [flowAnswers, setFlowAnswers] = useState<McqAnswers>({});
+  const [addons, setAddons] = useState<AddonChoices>({ auth: false, monetization: false });
   const [techStack, setTechStack] = useState<string[]>([]);
   const [finalSummary, setFinalSummary] = useState("");
   
   const router = useRouter();
 
-  const steps: Step[] = ["idea", "ui_ux", "features", "flow_extras", "tech_stack", "summary", "setup"];
+  const steps: Step[] = ["idea", "ui_ux", "features", "flow_extras", "addons", "tech_stack", "summary", "setup"];
   const currentStepIndex = steps.indexOf(step);
-  const totalProgressSteps = steps.length;
-  const progressValue = ((currentStepIndex + 1) / totalProgressSteps) * 100;
+  const totalProgressSteps = steps.length -1; // Don't count "setup" as a progress step
+  const progressValue = ((currentStepIndex) / totalProgressSteps) * 100;
 
-  const handleIdeaExtracted = useCallback((summary: string) => {
+  const handleIdeaExtracted = useCallback((summary: string, original: string) => {
     setIdeaSummary(summary);
+    setOriginalIdea(original);
     setStep("ui_ux");
   }, []);
 
@@ -49,6 +54,11 @@ export default function CreatePage() {
 
   const handleFlowExtrasComplete = useCallback((answers: McqAnswers) => {
     setFlowAnswers(answers);
+    setStep("addons");
+  }, []);
+
+  const handleAddonsComplete = useCallback((choices: AddonChoices) => {
+    setAddons(choices);
     setStep("tech_stack");
   }, []);
   
@@ -95,6 +105,8 @@ export default function CreatePage() {
             onComplete={handleFlowExtrasComplete}
           />
         );
+      case "addons":
+        return <AddonsForm onComplete={handleAddonsComplete} />;
       case "tech_stack":
         return <TechStackForm onComplete={handleTechStackComplete} />;
       case "summary":
@@ -103,11 +115,12 @@ export default function CreatePage() {
             ideaSummary={ideaSummary}
             answers={{ ...uiUxAnswers, ...featureAnswers, ...flowAnswers }}
             techStack={techStack}
+            addons={addons}
             onComplete={handleSummaryComplete}
           />
         );
       case "setup":
-        return <ProjectSetupDisplay finalSummary={finalSummary} />;
+        return <ProjectSetupDisplay finalSummary={finalSummary} originalIdea={originalIdea} />;
       default:
         return null;
     }

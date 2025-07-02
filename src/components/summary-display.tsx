@@ -15,9 +15,13 @@ interface SummaryDisplayProps {
   answers: Record<string, string>;
   techStack: string[];
   onComplete: (summary: string) => void;
+  addons: {
+    auth: boolean;
+    monetization: boolean;
+  };
 }
 
-export function SummaryDisplay({ ideaSummary, answers, techStack, onComplete }: SummaryDisplayProps) {
+export function SummaryDisplay({ ideaSummary, answers, techStack, onComplete, addons }: SummaryDisplayProps) {
     const [summary, setSummary] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const { toast } = useToast();
@@ -26,7 +30,13 @@ export function SummaryDisplay({ ideaSummary, answers, techStack, onComplete }: 
         const createSummary = async () => {
             setIsLoading(true);
             try {
-                const result = await generateFinalSummary({ ideaSummary, answers, techStack });
+                const result = await generateFinalSummary({ 
+                    ideaSummary, 
+                    answers, 
+                    techStack, 
+                    includeAuth: addons.auth, 
+                    includeMonetization: addons.monetization 
+                });
                 setSummary(result.finalSummary);
             } catch (error) {
                 console.error("Error generating final summary:", error);
@@ -42,7 +52,7 @@ export function SummaryDisplay({ ideaSummary, answers, techStack, onComplete }: 
         };
 
         createSummary();
-    }, [ideaSummary, answers, techStack, toast]);
+    }, [ideaSummary, answers, techStack, addons, toast]);
 
     const handleCopy = () => {
         if (!summary) return;

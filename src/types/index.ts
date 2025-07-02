@@ -2,6 +2,7 @@ export interface Project {
   id: string;
   userId: string;
   name: string;
+  originalIdea: string;
   finalSummary: string;
   setupPrompt: string;
   fileStructure: string;

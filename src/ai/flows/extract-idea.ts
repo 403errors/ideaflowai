@@ -17,7 +17,11 @@ const ExtractIdeaInputSchema = z.object({
 export type ExtractIdeaInput = z.infer<typeof ExtractIdeaInputSchema>;
 
 const ExtractIdeaOutputSchema = z.object({
-  markdownOutput: z.string().describe('The extracted idea in markdown format, with sections for Overview, Goals, Key Components, and Constraints.'),
+  markdownOutput: z
+    .string()
+    .describe(
+      'The extracted idea in markdown format, with sections for Overview, Goals, Key Features, Target Audience, Potential Monetization, and Constraints.'
+    ),
 });
 export type ExtractIdeaOutput = z.infer<typeof ExtractIdeaOutputSchema>;
 
@@ -27,26 +31,48 @@ export async function extractIdea(input: ExtractIdeaInput): Promise<ExtractIdeaO
 
 const prompt = ai.definePrompt({
   name: 'extractIdeaPrompt',
-  input: {schema: ExtractIdeaInputSchema},
+  input: {
+    schema: z.object({
+      text: z.string().optional().describe('Textual description of the application idea.'),
+      media: z
+        .string()
+        .optional()
+        .describe(
+          "A file containing the application idea, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+        ),
+    }),
+  },
   output: {schema: ExtractIdeaOutputSchema},
-  prompt: `You are an expert in extracting key information from various input formats (text, images, PDFs). Your goal is to distill the essence of an application idea into a structured markdown format.
+  prompt: `You are an expert product manager and business analyst. Your task is to analyze the user's input, which could be text, an image, or a PDF, and extract all relevant details to create a structured project idea in markdown format.
 
-  The markdown should have the following sections:
+Analyze the provided input and generate a markdown document with the following sections:
 
-  ## Overview
-  A brief summary of the application idea.
+## Overview
+A concise summary of the application idea. What is the core problem it solves?
 
-  ## Goals
-  The objectives the application aims to achieve.
+## Goals
+List the primary objectives and desired outcomes for this project.
 
-  ## Key Components
-  The essential features and functionalities of the application.
+## Key Features
+Detail the essential features and functionalities. Be specific.
 
-  ## Constraints
-  Any limitations or challenges in developing the application.
+## Target Audience
+Describe the ideal users for this application.
 
-  Here is the input:
-  {{input}}`,
+## Potential Monetization
+Suggest possible ways the application could generate revenue (e.g., subscriptions, ads, one-time purchases).
+
+## Constraints
+Identify any limitations, challenges, or non-goals mentioned or implied.
+
+Here is the user's input to analyze:
+{{#if text}}
+{{{text}}}
+{{/if}}
+{{#if media}}
+{{media url=media}}
+{{/if}}
+`,
 });
 
 const extractIdeaFlow = ai.defineFlow(
@@ -55,8 +81,19 @@ const extractIdeaFlow = ai.defineFlow(
     inputSchema: ExtractIdeaInputSchema,
     outputSchema: ExtractIdeaOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
+  async ({input}) => {
+    const isDataUri = input.startsWith('data:');
+
+    const promptInput: {text?: string; media?: string} = {};
+    if (isDataUri) {
+      promptInput.media = input;
+      // Providing text context helps the model know what to do with the file.
+      promptInput.text = 'Analyze the attached file which contains an application idea.';
+    } else {
+      promptInput.text = input;
+    }
+
+    const {output} = await prompt(promptInput);
     return output!;
   }
 );

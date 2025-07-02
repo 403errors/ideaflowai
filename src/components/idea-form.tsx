@@ -1,3 +1,4 @@
+
 "use client";
 
 import { extractIdea } from "@/ai/flows/extract-idea";
@@ -9,7 +10,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Paperclip, Send } from "lucide-react";
 import { useState, type ChangeEvent, type FormEvent, useCallback } from "react";
-import { Skeleton } from "./ui/skeleton";
 
 interface IdeaFormProps {
   onIdeaExtracted: (summary: string) => void;
@@ -27,7 +27,6 @@ const fileToDataURL = (file: File): Promise<string> => {
 export function IdeaForm({ onIdeaExtracted }: IdeaFormProps) {
   const [ideaText, setIdeaText] = useState("");
   const [fileName, setFileName] = useState("");
-  const [ideaInput, setIdeaInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [loadingReason, setLoadingReason] = useState("");
   const { toast } = useToast();
@@ -35,19 +34,24 @@ export function IdeaForm({ onIdeaExtracted }: IdeaFormProps) {
   const handleFileChange = useCallback(async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setLoadingReason("Extracting ideas from your file...");
+      setIsLoading(true);
       try {
-        setLoadingReason("Reading your file...");
-        setIsLoading(true);
         const dataUrl = await fileToDataURL(file);
-        setIdeaInput(dataUrl);
-        setIdeaText(`File uploaded: ${file.name}`);
+        const result = await extractIdea({ input: dataUrl });
+        setIdeaText(result.markdownOutput);
         setFileName(file.name);
+        toast({
+          title: "File Processed",
+          description: "We've extracted the key ideas and populated them below for your review.",
+        });
       } catch (error) {
         toast({
           variant: "destructive",
           title: "Error reading file",
           description: "Could not process the uploaded file.",
         });
+        setFileName("");
       } finally {
         setIsLoading(false);
       }
@@ -56,8 +60,7 @@ export function IdeaForm({ onIdeaExtracted }: IdeaFormProps) {
 
   const handleSubmit = useCallback(async (e: FormEvent) => {
     e.preventDefault();
-    const finalInput = ideaInput || ideaText;
-    if (!finalInput.trim()) {
+    if (!ideaText.trim()) {
       toast({
         variant: "destructive",
         title: "Input required",
@@ -66,22 +69,31 @@ export function IdeaForm({ onIdeaExtracted }: IdeaFormProps) {
       return;
     }
 
-    setLoadingReason("Extracting the core concepts from your idea...");
     setIsLoading(true);
-    try {
-      const result = await extractIdea({ input: finalInput });
-      onIdeaExtracted(result.markdownOutput);
-    } catch (error) {
-      console.error(error);
-      toast({
-        variant: "destructive",
-        title: "AI Error",
-        description: "Failed to process your idea. Please try again.",
-      });
-      setIsLoading(false);
+    
+    // If a file was uploaded, fileName will be set.
+    // In that case, ideaText already contains the markdown summary.
+    if (fileName) {
+      setLoadingReason("Finalizing your plan...");
+      onIdeaExtracted(ideaText);
+    } else {
+      // If no file, ideaText contains raw text, so we need to extract.
+      setLoadingReason("Extracting the core concepts from your idea...");
+      try {
+        const result = await extractIdea({ input: ideaText });
+        onIdeaExtracted(result.markdownOutput);
+      } catch (error) {
+        console.error(error);
+        toast({
+          variant: "destructive",
+          title: "AI Error",
+          description: "Failed to process your idea. Please try again.",
+        });
+        setIsLoading(false);
+      }
     }
     // Don't setIsLoading(false) here, as the component will unmount on success
-  }, [ideaInput, ideaText, onIdeaExtracted, toast]);
+  }, [ideaText, fileName, onIdeaExtracted, toast]);
   
   if (isLoading) {
     return (
@@ -109,23 +121,23 @@ export function IdeaForm({ onIdeaExtracted }: IdeaFormProps) {
       <CardHeader>
         <CardTitle className="font-headline text-3xl">Let's build your app</CardTitle>
         <CardDescription>
-          Start by describing your idea. You can write it down, or upload an image or PDF.
+          Start by describing your idea. You can write it down, or upload an image or PDF. Once uploaded, we'll extract the contents for you to review.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="idea-text">Describe your idea</Label>
+            <Label htmlFor="idea-text">Describe your idea (or review extracted text)</Label>
             <Textarea
               id="idea-text"
               placeholder="e.g., A mobile app that helps users find the best coffee shops nearby..."
               value={ideaText}
               onChange={(e) => {
                 setIdeaText(e.target.value);
-                setIdeaInput("");
+                // When user types, they are overriding the file.
                 setFileName("");
               }}
-              rows={8}
+              rows={12}
             />
           </div>
           <div className="flex items-center justify-center text-sm text-muted-foreground">
@@ -142,6 +154,8 @@ export function IdeaForm({ onIdeaExtracted }: IdeaFormProps) {
                 accept="image/*,application/pdf"
                 onChange={handleFileChange}
                 className="hidden"
+                // Reset file input so user can upload the same file again
+                key={fileName || 'file-input'}
               />
               <Button asChild variant="outline" type="button" className="w-full">
                 <Label htmlFor="idea-file" className="cursor-pointer flex items-center justify-center gap-2">
@@ -152,7 +166,7 @@ export function IdeaForm({ onIdeaExtracted }: IdeaFormProps) {
             </div>
           </div>
           <Button type="submit" className="w-full text-lg py-6" size="lg">
-            Generate Plan
+            {fileName ? 'Continue With This Plan' : 'Generate Plan'}
             <Send className="ml-2" />
           </Button>
         </form>

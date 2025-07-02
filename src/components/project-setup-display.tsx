@@ -1,50 +1,49 @@
 "use client";
 
 import { generateProjectSetup } from "@/ai/flows/generate-project-setup";
-import { generateProjectName } from "@/ai/flows/generate-project-name";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, FileCode, FolderTree, Rocket, Save, Loader2, LogIn, WandSparkles } from "lucide-react";
+import { Copy, FileCode, Rocket, Save, Loader2, LogIn } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
 import { saveProject } from "@/lib/actions";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
+import { FileInput, FileText } from "lucide-react";
 
 interface ProjectSetupDisplayProps {
   finalSummary: string;
   originalIdea: string;
+  projectName: string;
 }
 
-export function ProjectSetupDisplay({ finalSummary, originalIdea }: ProjectSetupDisplayProps) {
-    const [projectName, setProjectName] = useState('');
+export function ProjectSetupDisplay({ finalSummary, originalIdea, projectName: nameFromPrevStep }: ProjectSetupDisplayProps) {
+    const [editableProjectName, setEditableProjectName] = useState(nameFromPrevStep);
     const [setupPromptContent, setSetupPromptContent] = useState('');
     const [fileStructure, setFileStructure] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
-    const [isGeneratingName, setIsGeneratingName] = useState(false);
     const { toast } = useToast();
     const { user } = useAuth();
     const router = useRouter();
+    
+    useEffect(() => {
+        setEditableProjectName(nameFromPrevStep);
+    }, [nameFromPrevStep]);
 
     useEffect(() => {
         const getSetup = async () => {
-            if (!finalSummary) return;
+            if (!finalSummary || !nameFromPrevStep) return;
             setIsLoading(true);
             try {
-                const [setupResult, nameResult] = await Promise.all([
-                    generateProjectSetup({ finalSummary }),
-                    generateProjectName({ summary: finalSummary })
-                ]);
-
+                const setupResult = await generateProjectSetup({ finalSummary, projectName: nameFromPrevStep });
                 setSetupPromptContent(setupResult.setupPromptContent);
                 setFileStructure(setupResult.fileStructure);
-                setProjectName(nameResult.projectName);
-
             } catch (error) {
                 console.error("Error generating project setup:", error);
                 toast({
@@ -57,27 +56,14 @@ export function ProjectSetupDisplay({ finalSummary, originalIdea }: ProjectSetup
             }
         };
         getSetup();
-    }, [finalSummary, toast]);
-    
-    const handleGenerateName = async () => {
-        setIsGeneratingName(true);
-        try {
-            const result = await generateProjectName({ summary: finalSummary });
-            setProjectName(result.projectName);
-            toast({ title: 'Name Generated!', description: 'A new creative name has been generated.' });
-        } catch (error) {
-            toast({ variant: 'destructive', title: 'AI Error', description: 'Could not generate a project name.' });
-        } finally {
-            setIsGeneratingName(false);
-        }
-    };
+    }, [finalSummary, nameFromPrevStep, toast]);
 
     const handleSave = async () => {
         if (!user) {
             router.push('/login');
             return;
         }
-        if (!projectName.trim()) {
+        if (!editableProjectName.trim()) {
             toast({
                 variant: 'destructive',
                 title: 'Project Name Required',
@@ -90,7 +76,7 @@ export function ProjectSetupDisplay({ finalSummary, originalIdea }: ProjectSetup
         try {
             const newProjectId = await saveProject({
                 userId: user.uid,
-                name: projectName,
+                name: editableProjectName,
                 originalIdea,
                 finalSummary,
                 setupPrompt: setupPromptContent,
@@ -130,7 +116,7 @@ export function ProjectSetupDisplay({ finalSummary, originalIdea }: ProjectSetup
                 </div>
                 <CardTitle className="font-headline text-3xl text-center">Your Development Brief</CardTitle>
                 <CardDescription className="text-center">
-                    Here is the final plan. Give your project a name, save it, and start generating feature prompts.
+                    This is your final, shareable brief. Save it to your dashboard to access the feature prompt generator.
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
@@ -138,10 +124,6 @@ export function ProjectSetupDisplay({ finalSummary, originalIdea }: ProjectSetup
                     <div className="space-y-6">
                          <Skeleton className="h-10 w-full" />
                         <div className="space-y-2">
-                           <Skeleton className="h-8 w-1/3 mb-2" />
-                           <Skeleton className="h-40 w-full" />
-                        </div>
-                         <div className="space-y-2">
                            <Skeleton className="h-8 w-1/3 mb-2" />
                            <Skeleton className="h-40 w-full" />
                         </div>
@@ -153,15 +135,10 @@ export function ProjectSetupDisplay({ finalSummary, originalIdea }: ProjectSetup
                              <div className="flex gap-2 items-center">
                                 <Input
                                     id="project-name"
-                                    placeholder="e.g., 'My Awesome Coffee Finder App'"
-                                    value={projectName}
-                                    onChange={(e) => setProjectName(e.target.value)}
-                                    className="flex-grow"
+                                    value={editableProjectName}
+                                    onChange={(e) => setEditableProjectName(e.target.value)}
+                                    className="flex-grow font-headline text-lg"
                                 />
-                                <Button type="button" onClick={handleGenerateName} disabled={isGeneratingName || isLoading}>
-                                    {isGeneratingName ? <Loader2 className="mr-2 animate-spin" /> : <WandSparkles className="mr-2" />}
-                                    Generate
-                                </Button>
                             </div>
                         </div>
                         <div>
@@ -178,6 +155,41 @@ export function ProjectSetupDisplay({ finalSummary, originalIdea }: ProjectSetup
                                 className="font-mono text-sm bg-background/50"
                             />
                         </div>
+
+                         <Accordion type="single" collapsible className="w-full pt-4 mt-4 border-t">
+                            <AccordionItem value="original-idea">
+                                <AccordionTrigger className="text-base font-semibold hover:no-underline">
+                                    <div className="flex items-center gap-3">
+                                        <FileInput className="h-5 w-5 text-primary"/>
+                                        View Original Idea Input
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <Textarea
+                                        readOnly
+                                        value={originalIdea}
+                                        rows={10}
+                                        className="font-mono text-sm bg-background/50"
+                                    />
+                                </AccordionContent>
+                            </AccordionItem>
+                            <AccordionItem value="full-plan" className="border-b-0">
+                                <AccordionTrigger className="text-base font-semibold hover:no-underline">
+                                    <div className="flex items-center gap-3">
+                                        <FileText className="h-5 w-5 text-primary"/>
+                                        View Full Application Plan
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <Textarea
+                                        readOnly
+                                        value={finalSummary}
+                                        rows={20}
+                                        className="font-mono text-sm bg-background/50"
+                                    />
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
                     </>
                 )}
                  <Button onClick={handleSave} className="w-full text-lg py-6" size="lg" disabled={isLoading || isSaving}>

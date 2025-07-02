@@ -12,6 +12,7 @@ import {z} from 'genkit';
 
 const GenerateProjectSetupInputSchema = z.object({
   finalSummary: z.string().describe('The final application plan in markdown format.'),
+  projectName: z.string().describe('The name of the project.'),
 });
 export type GenerateProjectSetupInput = z.infer<typeof GenerateProjectSetupInputSchema>;
 
@@ -31,7 +32,7 @@ const prompt = ai.definePrompt({
   output: {schema: GenerateProjectSetupOutputSchema},
   prompt: `You are a senior software engineer tasked with creating a comprehensive "Setup Prompt" for an AI developer. This document is the foundational blueprint and MUST contain all necessary information to begin the project.
 
-Based on the final application plan provided below, generate two things:
+Based on the final application plan for a project named '{{{projectName}}}' provided below, generate two things:
 1.  A "Setup Prompt" document.
 2.  A recommended file structure for a Next.js project.
 

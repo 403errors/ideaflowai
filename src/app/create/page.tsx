@@ -28,13 +28,14 @@ export default function CreatePage() {
   const [addons, setAddons] = useState<AddonChoices>({ auth: false, monetization: false });
   const [techStack, setTechStack] = useState<string[]>([]);
   const [finalSummary, setFinalSummary] = useState("");
+  const [projectName, setProjectName] = useState("");
   
   const router = useRouter();
 
   const steps: Step[] = ["idea", "ui_ux", "features", "flow_extras", "addons", "tech_stack", "summary", "setup"];
   const currentStepIndex = steps.indexOf(step);
-  const totalProgressSteps = steps.length -1; // Don't count "setup" as a progress step
-  const progressValue = ((currentStepIndex) / totalProgressSteps) * 100;
+  const totalProgressSteps = steps.length;
+  const progressValue = ((currentStepIndex) / (totalProgressSteps - 1)) * 100;
 
   const handleIdeaExtracted = useCallback((summary: string, original: string) => {
     setIdeaSummary(summary);
@@ -67,8 +68,9 @@ export default function CreatePage() {
     setStep("summary");
   }, []);
 
-  const handleSummaryComplete = useCallback((summary: string) => {
+  const handleSummaryComplete = useCallback((summary: string, name: string) => {
     setFinalSummary(summary);
+    setProjectName(name);
     setStep("setup");
   }, []);
 
@@ -120,7 +122,7 @@ export default function CreatePage() {
           />
         );
       case "setup":
-        return <ProjectSetupDisplay finalSummary={finalSummary} originalIdea={originalIdea} />;
+        return <ProjectSetupDisplay finalSummary={finalSummary} originalIdea={originalIdea} projectName={projectName}/>;
       default:
         return null;
     }

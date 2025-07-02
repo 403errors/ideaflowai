@@ -36,9 +36,15 @@ export function ProjectSetupDisplay({ finalSummary, originalIdea }: ProjectSetup
             if (!finalSummary) return;
             setIsLoading(true);
             try {
-                const result = await generateProjectSetup({ finalSummary });
-                setSetupPromptContent(result.setupPromptContent);
-                setFileStructure(result.fileStructure);
+                const [setupResult, nameResult] = await Promise.all([
+                    generateProjectSetup({ finalSummary }),
+                    generateProjectName({ summary: finalSummary })
+                ]);
+
+                setSetupPromptContent(setupResult.setupPromptContent);
+                setFileStructure(setupResult.fileStructure);
+                setProjectName(nameResult.projectName);
+
             } catch (error) {
                 console.error("Error generating project setup:", error);
                 toast({
@@ -167,20 +173,6 @@ export function ProjectSetupDisplay({ finalSummary, originalIdea }: ProjectSetup
                             </div>
                             <Textarea
                                 value={setupPromptContent}
-                                readOnly
-                                rows={15}
-                                className="font-mono text-sm bg-background/50"
-                            />
-                        </div>
-                         <div>
-                            <div className="flex items-center justify-between mb-2">
-                                <h3 className="text-xl font-semibold flex items-center gap-2"><FolderTree /> File Structure</h3>
-                                <Button variant="ghost" size="sm" onClick={() => handleCopy(fileStructure, "File Structure")}>
-                                    <Copy className="mr-2 h-4 w-4" /> Copy
-                                </Button>
-                            </div>
-                            <Textarea
-                                value={fileStructure}
                                 readOnly
                                 rows={15}
                                 className="font-mono text-sm bg-background/50"

@@ -95,7 +95,6 @@ export default function ProjectPage() {
                 </p>
                 <ol className="list-decimal list-inside mt-2 space-y-1 text-muted-foreground">
                     <li>Use the <strong>Setup Prompt</strong> to give the AI the core context of your application.</li>
-                    <li>Provide the <strong>File Structure</strong> to establish the project's architecture.</li>
                     <li>Use the <strong>Feature Generation</strong> panel to build your app step-by-step.</li>
                 </ol>
                 <p className="mt-2 text-sm text-muted-foreground">
@@ -117,20 +116,6 @@ export default function ProjectPage() {
                   <Textarea
                       readOnly
                       value={project.setupPrompt}
-                      rows={15}
-                      className="font-mono text-sm bg-background/50"
-                  />
-              </div>
-              <div>
-                  <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold text-xl flex items-center gap-3"><span className="flex items-center justify-center bg-primary text-primary-foreground rounded-full h-8 w-8 text-sm font-mono">2</span>File Structure</h3>
-                      <Button variant="ghost" size="sm" onClick={() => handleCopy(project.fileStructure, 'File Structure')}>
-                          <Copy className="mr-2 h-4 w-4" /> Copy
-                      </Button>
-                  </div>
-                  <Textarea
-                      readOnly
-                      value={project.fileStructure}
                       rows={15}
                       className="font-mono text-sm bg-background/50"
                   />
@@ -182,7 +167,7 @@ export default function ProjectPage() {
               </Accordion>
           </div>
             <div>
-                <h3 className="font-semibold text-xl flex items-center gap-3 mb-2"><span className="flex items-center justify-center bg-primary text-primary-foreground rounded-full h-8 w-8 text-sm font-mono">3</span>Feature Prompts</h3>
+                <h3 className="font-semibold text-xl flex items-center gap-3 mb-2"><span className="flex items-center justify-center bg-primary text-primary-foreground rounded-full h-8 w-8 text-sm font-mono">2</span>Feature Prompts</h3>
                 <FeatureGenerationDisplay setupPrompt={project.setupPrompt} fileStructure={project.fileStructure} />
             </div>
         </div>

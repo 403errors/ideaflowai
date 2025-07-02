@@ -37,11 +37,13 @@ export function IdeaForm({ onIdeaExtracted }: IdeaFormProps) {
     if (file) {
       setLoadingReason("Extracting ideas from your file...");
       setIsLoading(true);
-      setOriginalIdea(`Input from file: ${file.name}`);
       try {
         const dataUrl = await fileToDataURL(file);
         const result = await extractIdea({ input: dataUrl });
+        // The extracted text populates the textarea for review
         setIdeaText(result.markdownOutput);
+        // It also becomes the "original idea". If the user edits it, `handleTextChange` will update it.
+        setOriginalIdea(result.markdownOutput);
         setFileName(file.name);
         toast({
           title: "File Processed",
@@ -75,7 +77,8 @@ export function IdeaForm({ onIdeaExtracted }: IdeaFormProps) {
     setIsLoading(true);
     
     if (fileName) {
-      // If a file was uploaded, the idea is already extracted.
+      // If a file was uploaded, the idea is already extracted. The potentially edited
+      // text in `ideaText` is the summary, and the same text in `originalIdea` is saved.
       setLoadingReason("Finalizing your plan...");
       onIdeaExtracted(ideaText, originalIdea);
     } else {
@@ -83,6 +86,7 @@ export function IdeaForm({ onIdeaExtracted }: IdeaFormProps) {
       setLoadingReason("Extracting the core concepts from your idea...");
       try {
         const result = await extractIdea({ input: ideaText });
+        // The user's raw typed text is the original idea.
         onIdeaExtracted(result.markdownOutput, ideaText);
       } catch (error)
       {
@@ -99,9 +103,10 @@ export function IdeaForm({ onIdeaExtracted }: IdeaFormProps) {
   
   const handleTextChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setIdeaText(e.target.value);
-    // When user types, they are creating a new original idea
-    if (fileName) setFileName("");
+    // When user types, they are creating a new original idea.
+    // This will also apply to edits of the extracted text from a file.
     setOriginalIdea(e.target.value);
+    if (fileName) setFileName("");
   }
 
   if (isLoading) {

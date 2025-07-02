@@ -11,8 +11,6 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
 import { saveProject } from "@/lib/actions";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
 import { FileInput, FileText } from "lucide-react";
 
@@ -22,8 +20,7 @@ interface ProjectSetupDisplayProps {
   projectName: string;
 }
 
-export function ProjectSetupDisplay({ finalSummary, originalIdea, projectName: nameFromPrevStep }: ProjectSetupDisplayProps) {
-    const [editableProjectName, setEditableProjectName] = useState(nameFromPrevStep);
+export function ProjectSetupDisplay({ finalSummary, originalIdea, projectName }: ProjectSetupDisplayProps) {
     const [setupPromptContent, setSetupPromptContent] = useState('');
     const [fileStructure, setFileStructure] = useState('');
     const [isLoading, setIsLoading] = useState(true);
@@ -31,17 +28,13 @@ export function ProjectSetupDisplay({ finalSummary, originalIdea, projectName: n
     const { toast } = useToast();
     const { user } = useAuth();
     const router = useRouter();
-    
-    useEffect(() => {
-        setEditableProjectName(nameFromPrevStep);
-    }, [nameFromPrevStep]);
 
     useEffect(() => {
         const getSetup = async () => {
-            if (!finalSummary || !nameFromPrevStep) return;
+            if (!finalSummary || !projectName) return;
             setIsLoading(true);
             try {
-                const setupResult = await generateProjectSetup({ finalSummary, projectName: nameFromPrevStep });
+                const setupResult = await generateProjectSetup({ finalSummary, projectName });
                 setSetupPromptContent(setupResult.setupPromptContent);
                 setFileStructure(setupResult.fileStructure);
             } catch (error) {
@@ -56,18 +49,18 @@ export function ProjectSetupDisplay({ finalSummary, originalIdea, projectName: n
             }
         };
         getSetup();
-    }, [finalSummary, nameFromPrevStep, toast]);
+    }, [finalSummary, projectName, toast]);
 
     const handleSave = async () => {
         if (!user) {
             router.push('/login');
             return;
         }
-        if (!editableProjectName.trim()) {
+        if (!projectName.trim()) {
             toast({
                 variant: 'destructive',
                 title: 'Project Name Required',
-                description: 'Please enter a name for your project.'
+                description: 'Something went wrong, the project name is missing.'
             });
             return;
         }
@@ -76,7 +69,7 @@ export function ProjectSetupDisplay({ finalSummary, originalIdea, projectName: n
         try {
             const newProjectId = await saveProject({
                 userId: user.uid,
-                name: editableProjectName,
+                name: projectName,
                 originalIdea,
                 finalSummary,
                 setupPrompt: setupPromptContent,
@@ -116,31 +109,23 @@ export function ProjectSetupDisplay({ finalSummary, originalIdea, projectName: n
                 </div>
                 <CardTitle className="font-headline text-3xl text-center">Your Development Brief</CardTitle>
                 <CardDescription className="text-center">
-                    This is your final, shareable brief. Save it to your dashboard to access the feature prompt generator.
+                    This is your final, shareable brief for <span className="font-bold text-foreground">{projectName}</span>. Save it to your dashboard to access the feature prompt generator.
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
                 {isLoading ? (
                     <div className="space-y-6">
-                         <Skeleton className="h-10 w-full" />
                         <div className="space-y-2">
                            <Skeleton className="h-8 w-1/3 mb-2" />
                            <Skeleton className="h-40 w-full" />
                         </div>
+                         <div className="space-y-2">
+                           <Skeleton className="h-8 w-1/3 mb-2" />
+                           <Skeleton className="h-24 w-full" />
+                        </div>
                     </div>
                 ) : (
                     <>
-                        <div className="space-y-2">
-                            <Label htmlFor="project-name" className="text-lg">Project Name</Label>
-                             <div className="flex gap-2 items-center">
-                                <Input
-                                    id="project-name"
-                                    value={editableProjectName}
-                                    onChange={(e) => setEditableProjectName(e.target.value)}
-                                    className="flex-grow font-headline text-lg"
-                                />
-                            </div>
-                        </div>
                         <div>
                             <div className="flex items-center justify-between mb-2">
                                 <h3 className="text-xl font-semibold flex items-center gap-2"><FileCode /> Setup Prompt</h3>

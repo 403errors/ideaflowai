@@ -90,7 +90,6 @@ To run this project locally, follow these steps:
     ```bash
     npm run genkit:dev
     ```
-
 5.  **Open the application:**
     Navigate to [http://localhost:9002](http://localhost:9002) in your browser.
 
